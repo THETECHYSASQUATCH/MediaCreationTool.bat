@@ -1,9 +1,24 @@
-Not just an Universal MediaCreationTool wrapper script with ingenious support for business editions,  
+Enhanced Universal MediaCreationTool with support for Windows XP through Windows 11!  
 <img src="preview.png">  
-A powerful yet simple windows 10 / 11 deployment automation tool as well!  
+A powerful yet simple Windows deployment automation tool supporting all major Windows versions!  
 *If you had no success launching the script so far, this latest version will work*  
 
-Presets  
+## Supported Windows Versions
+- **Windows XP** - Guidance and links to legitimate sources (end-of-life)
+- **Windows Vista** - Guidance and links to legitimate sources (end-of-life)  
+- **Windows 7** - Volume licensing and software recovery sources
+- **Windows 8** - Volume licensing sources
+- **Windows 8.1** - Volume licensing and software recovery sources
+- **Windows 10** - All versions from 1507 to 22H2 (full MCT support)
+- **Windows 11** - All versions from 21H2 to 23H2 (full MCT support)
+
+## Enhanced Features
+- **Dynamic URL validation** - Checks download link availability before attempting downloads
+- **Improved error handling** - Clear error messages with troubleshooting guidance
+- **Legacy Windows support** - Guidance for obtaining older Windows installation media
+- **User-friendly interface** - Clear instructions for each Windows version choice
+
+Presets
 -------  
 1 ***Auto Upgrade*** with detected media, script assists setupprep for upgrading directly  
 > _- can keep files and apps on more scenarios where os and target edition does not match_  
@@ -63,6 +78,43 @@ Finally, it sets recommended setup options with least amount of issues on upgrad
 >
 > Can even add a VL / MAK / retail product key in the same way to take care of licensing differences.  
 > The script also picks up any `$ISO$` folder in the current location - for $OEM$ branding, configuration, tweaks etc.  
+
+Legacy Windows Support (XP, Vista, 7, 8, 8.1)
+--------------------------------------------
+For older Windows versions that are no longer supported by Microsoft's Media Creation Tool:
+
+**Windows XP** (End-of-life: April 8, 2014)
+- No longer available from Microsoft  
+- The script provides guidance to legitimate sources:
+  - Original retail/OEM installation media
+  - Volume Licensing Service Center (business customers)
+  - Software preservation archives (archive.org, etc.)
+
+**Windows Vista** (End-of-life: April 11, 2017)  
+- Limited availability from Microsoft Volume Licensing
+- The script provides guidance to legitimate sources
+
+**Windows 7** (End-of-life: January 14, 2020)
+- Available from Microsoft Volume Licensing Service Center
+- Available from Microsoft Software Recovery (with valid product key)
+- Some archived Digital River links (while they still work)
+
+**Windows 8/8.1** (8.1 end-of-life: January 10, 2023)
+- Available from Microsoft Volume Licensing Service Center  
+- Windows 8.1 available from Microsoft Software Recovery (with valid product key)
+
+*Note: All legacy Windows versions should only be used for:*
+- Legacy system support
+- Virtual machines for testing
+- Systems that cannot be upgraded to newer Windows versions
+
+Enhanced Error Handling
+----------------------
+The script now includes improved error handling for download failures:
+- **URL validation** - Checks if download links are accessible before attempting downloads
+- **Clear error messages** - Explains potential causes of download failures
+- **Troubleshooting guidance** - Provides steps to resolve common issues
+- **Alternative sources** - Suggests legitimate alternative download sources when Microsoft links fail
 
 Changelog  
 ---------  

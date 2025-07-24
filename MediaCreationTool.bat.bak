@@ -48,8 +48,8 @@ set /a UNHIDE_BUSINESS=1
 set /a INSERT_BUSINESS=1
 
 ::# MCT Version choice dialog items and default-index [11_23H2] 
-set VERSIONS=1507,1511,1607,1703,1709,1803,1809,1903,1909,20H1,20H2,21H1,21H2,22H2,11_21H2,11_22H2,11_23H2,XP,Vista,7,8,8.1
-set /a dV=17
+set VERSIONS=XP,Vista,7,8,8.1,1507,1511,1607,1703,1709,1803,1809,1903,1909,20H1,20H2,21H1,21H2,22H2,11_21H2,11_22H2,11_23H2
+set /a dV=22
 
 ::# MCT Preset choice dialog items and default-index [Select in MCT]
 set PRESETS=^&Auto Upgrade,Auto ^&ISO,Auto ^&USB,^&Select,MCT ^&Defaults
@@ -65,8 +65,8 @@ for %%s in (%OS_LANGCODE%) do set "OS_LANGCODE=%%s"
 set "OS_ARCH=x64" & if "%PROCESSOR_ARCHITECTURE:~-2%" equ "86" if not defined PROCESSOR_ARCHITEW6432 set "OS_ARCH=x86"
 
 ::# parse MCT choice from script name or commandline - accepts both formats: 1909 or 19H2 etc.
-for %%V in (1.1507 2.1511 3.1607 4.1703 5.1709 6.1803 7.1809 8.1903 8.19H1 9.1909 9.19H2 10.2004 10.20H1 11.2009 11.20H2 12.2104
- 12.21H1 13.2109 13.21H2 14.2210 14.22H2 15.2110 15.11_21H2 16.2209 16.11_22H2 17.2310 17.11_23H2 18.XP 19.Vista 20.7 21.8 22.8.1) do for %%s in (%MCT% %~n0 %*) do if /i %%~xV equ .%%~s set "MCT=%%~nV" & set "VID=%%~s"
+for %%V in (1.XP 2.Vista 3.7 4.8 5.8.1 6.1507 7.1511 8.1607 9.1703 10.1709 11.1803 12.1809 13.1903 13.19H1 14.1909 14.19H2 15.2004 15.20H1 16.2009 16.20H2 17.2104
+ 17.21H1 18.2109 18.21H2 19.2210 19.22H2 20.2110 20.11_21H2 21.2209 21.11_22H2 22.2310 22.11_23H2) do for %%s in (%MCT% %~n0 %*) do if /i %%~xV equ .%%~s set "MCT=%%~nV" & set "VID=%%~s"
 if defined MCT if not defined VID set "MCT="
 
 ::# parse AUTO from script name or commandline - starts unattended upgrade / in-place repair / cross-edition
@@ -142,25 +142,25 @@ if %MCT%0 gtr 1 if %PRE%0 lss 1 call :choices PRE "%PRESETS%"  %dP% "MCT Preset"
 if %MCT%0 gtr 1 if %PRE%0 lss 1 goto choice-0 = cancel
 goto choice-%MCT%
 
-:choice-17
+:choice-22
 set "VER=22631" & set "VID=11_23H2" & set "CB=22631.2861.231204-0538.23H2_ni_release_svc_refresh" & set "CT=2023/12/" & set "CC=2.0"
 set "CAB=https://download.microsoft.com/download/6/2/b/62b47bc5-1b28-4bfa-9422-e7a098d326d4/products_win11_20231208.cab"
 set "EXE=https://download.microsoft.com/download/e/c/d/ecd532eb-bed0-465a-9b7a-330066bec3ce/MediaCreationTool_Win11_23H2.exe"
 goto process ::# refreshed 22621 base with integrated 23H2 enablement package
 
-:choice-16
+:choice-21
 set "VER=22621" & set "VID=11_22H2" & set "CB=22621.1702.230505-1222.ni_release_svc_refresh" & set "CT=2023/05/" & set "CC=2.0"
 set "CAB=https://download.microsoft.com/download/b/1/9/b19bd7fd-78c4-4f88-8c40-3e52aee143c2/products_win11_20230510.cab.cab"
 set "EXE=https://software-static.download.prss.microsoft.com/dbazure/988969d5-f34g-4e03-ac9d-1f9786c66749/mediacreationtool.exe"
 goto process ::# windows 11 22H2
 
-:choice-15
+:choice-20
 set "VER=22000" & set "VID=11_21H2" & set "CB=22000.318.211104-1236.co_release_svc_refresh" & set "CT=2021/11/" & set "CC=2.0"
 set "CAB=https://download.microsoft.com/download/1/b/4/1b4e06e2-767a-4c9a-9899-230fe94ba530/products_Win11_20211115.cab"
 set "EXE=https://software-download.microsoft.com/download/pr/888969d5-f34g-4e03-ac9d-1f9786c69161/MediaCreationToolW11.exe"
 goto process ::# windows 11 : usability and ui downgrade, and even more ChrEdge bloat (but somewhat snappier multitasking)
 
-:choice-14
+:choice-19
 set "VER=19045" & set "VID=22H2" & set "CB=19045.2965.230505-1139.22h2_release_svc_refresh" & set "CT=2023/05/" & set "CC=1.4.1"
 set "CAB=https://download.microsoft.com/download/3/c/9/3c959fca-d288-46aa-b578-2a6c6c33137a/products_win10_20230510.cab.cab"
 set "EXE=https://download.microsoft.com/download/9/e/a/9eac306f-d134-4609-9c58-35d1638c2363/MediaCreationTool22H2.exe"
@@ -257,97 +257,8 @@ rem 1507 MCT exe works but cant select Education - using 1607 one instead anyway
 set "EXE=https://download.microsoft.com/download/C/F/9/CF9862F9-3D22-4811-99E7-68CE3327DAE6/MediaCreationTool.exe"
 goto process ::# fastest for potato PCs (but with excruciantly slow windows update process)
 
-:choice-22
-echo.
-%<%:0e " Windows 8.1 Support "%>%
-echo.
-%<%:17 "Windows 8.1 installation media can be obtained from: "%>%
-echo.
-%<%:1f "Microsoft Volume Licensing Service Center (business customers): "%>%
-%<%:1f "https://www.microsoft.com/licensing/servicecenter "%>%
-echo.
-%<%:1f "Microsoft Software Recovery site (with valid product key): "%>%
-%<%:1f "https://www.microsoft.com/software-download/ "%>%
-echo.
-%<%:17 "Note: Windows 8.1 reached end of support on January 10, 2023 "%>%
-echo.
-pause
-exit /b
-
-:choice-21
-echo.
-%<%:0e " Windows 8 Support "%>%
-echo.
-%<%:17 "Windows 8 installation media can be obtained from: "%>%
-echo.
-%<%:1f "Microsoft Volume Licensing Service Center (business customers): "%>%
-%<%:1f "https://www.microsoft.com/licensing/servicecenter "%>%
-echo.
-%<%:17 "Note: Windows 8 is no longer supported. Consider upgrading to Windows 10/11. "%>%
-echo.
-pause
-exit /b
-
-:choice-20
-echo.
-%<%:0e " Windows 7 Support "%>%
-echo.
-%<%:17 "Windows 7 installation media can be obtained from: "%>%
-echo.
-%<%:1f "Microsoft Volume Licensing Service Center (business customers): "%>%
-%<%:1f "https://www.microsoft.com/licensing/servicecenter "%>%
-echo.
-%<%:1f "Microsoft Software Recovery site (with valid product key): "%>%
-%<%:1f "https://www.microsoft.com/software-download/windows7 "%>%
-echo.
-%<%:1f "Alternative legitimate sources: "%>%
-echo.
-%<%:17 "Windows 7 SP1 Professional x64: "%>%
-%<%:17 "https://archive.org/details/Win7_Pro_SP1_English_x64 "%>%
-%<%:17 "Windows 7 SP1 Home Premium x64: "%>%
-%<%:17 "https://archive.org/details/Windows7HomePremiumSP1x64 "%>%
-echo.
-%<%:17 "Note: Windows 7 reached end of support on January 14, 2020 "%>%
-%<%:17 "Extended Security Updates ended January 10, 2023 "%>%
-echo.
-pause
-exit /b
-
-:choice-19
-echo.
-%<%:0e " Windows Vista Support "%>%
-echo.
-%<%:17 "Windows Vista reached end of life and is no longer supported. "%>%
-%<%:17 "Installation media may be available from: "%>%
-echo.
-%<%:1f "Microsoft Volume Licensing Service Center (if you have access): "%>%
-%<%:1f "https://www.microsoft.com/licensing/servicecenter "%>%
-echo.
-%<%:17 "Note: Windows Vista reached end of support on April 11, 2017 "%>%
-echo.
-pause
-exit /b
-
-:choice-18
-echo.
-%<%:0e " Windows XP Support "%>%
-echo.
-%<%:17 "Windows XP reached end of life and is no longer supported. "%>%
-%<%:17 "Installation media is NOT officially available from Microsoft. "%>%
-echo.
-%<%:1f "For legacy system support, you may find archived media from: "%>%
-%<%:17 "- Original retail/OEM installation discs "%>%
-%<%:17 "- Volume Licensing Service Center (business customers) "%>%
-%<%:17 "- Software preservation archives "%>%
-echo.
-%<%:17 "Note: Windows XP reached end of support on April 8, 2014 "%>%
-%<%:1f "Use only for legacy system support or virtual machines "%>%
-echo.
-pause
-exit /b
-
 :choice- ;( something happened (broken environment/powershell?) and should cancel, but continue with defaults instead
-set /a MCT=%dv% & set /a PRE=%dP% & goto choice-22
+set /a MCT=%dv% & set /a PRE=%dP% & goto choice-%dV%
 
 :choice-0
 %<%:0c " CANCELED "%>% & timeout /t 3 >nul & exit /b
@@ -461,9 +372,9 @@ if %PRE% leq 3 %<%:6f " %MEDIA_LANGCODE% "%>>%  &  %<%:9f " %MEDIA_CFG% "%>>%  &
 echo;
 
 ::# download MCT and CAB / XML - new snippet to try via bits, net, certutil, and insecure/secure
-if defined EXE echo;%EXE% & call :CHECK_URL "%EXE%" && call :DOWNLOAD "%EXE%" MediaCreationTool%VID%.exe
-if defined XML echo;%XML% & call :CHECK_URL "%XML%" && call :DOWNLOAD "%XML%" products%VID%.xml
-if defined CAB echo;%CAB% & call :CHECK_URL "%CAB%" && call :DOWNLOAD "%CAB%" products%VID%.cab
+if defined EXE echo;%EXE% & call :DOWNLOAD "%EXE%" MediaCreationTool%VID%.exe
+if defined XML echo;%XML% & call :DOWNLOAD "%XML%" products%VID%.xml
+if defined CAB echo;%CAB% & call :DOWNLOAD "%CAB%" products%VID%.cab
 if exist products%VID%.xml copy /y products%VID%.xml products.xml >nul 2>nul
 if exist products%VID%.cab del /f /q products%VID%.xml >nul 2>nul
 if exist products%VID%.cab expand.exe -R products%VID%.cab -F:* . >nul 2>nul
@@ -993,36 +904,8 @@ function DOWNLOAD ($u, $f, $p = (get-location).Path) {
     if (([IO.FileInfo]$file).Exists) {return}; try {$null = bitsadmin /transfer $j /priority foreground $url $file} catch {}
     if (([IO.FileInfo]$file).Exists) {return}; try {$wc.DownloadFile($url, $file)} catch {}
   }
-  if (([IO.FileInfo]$file).Exists) {return}; write-host -fore Red " $f download failed "
-  write-host -fore Yellow " This may indicate: "
-  write-host -fore Yellow " - Network connectivity issues "
-  write-host -fore Yellow " - Microsoft has moved or removed the file "
-  write-host -fore Yellow " - Server maintenance in progress "
-  write-host -fore Yellow " Please check your internet connection and try again later "
-  write-host ""
-  pause
-} #:DOWNLOAD:# try download url via bits, net, and http/https - enhanced error handling
-
-:CHECK_URL
-set ^ #=;$u='%~1'; CHECK_URL $u
-set ^ #=& set "0=%~f0"& set 1=;CHECK_URL %*& powershell -nop -c "%#%"& exit /b %errorlevel%
-function CHECK_URL ($u) {
-  write-host -fore Gray "Checking URL availability: $u"
-  try {
-    $request = [System.Net.WebRequest]::Create($u)
-    $request.Method = "HEAD"
-    $request.Timeout = 10000
-    $response = $request.GetResponse()
-    $response.Close()
-    write-host -fore Green "URL is accessible"
-    return 0
-  } catch {
-    write-host -fore Red "URL check failed: $($_.Exception.Message)"
-    write-host -fore Yellow "This Windows version may no longer be available from Microsoft"
-    write-host -fore Yellow "Please check for alternative download sources"
-    return 1
-  }
-} #:CHECK_URL:# validate URL accessibility before download attempt
+  if (([IO.FileInfo]$file).Exists) {return}; write-host -fore Yellow " $f download failed "
+} #:DOWNLOAD:# try download url via bits, net, and http/https - snippet by AveYo, 2021
 
 ::--------------------------------------------------------------------------------------------------------------------------------
 #:CHOICES:#  [PARAMS] indexvar "c,h,o,i,c,e,s"  [OPTIONAL]  default-index "title" fontsize backcolor forecolor winsize
