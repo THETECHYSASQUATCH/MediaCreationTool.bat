@@ -1,13 +1,13 @@
 @goto latest at github.com/AveYo/MediaCreationTool.bat
-:Universal MCT wrapper script for all Windows 10/11 versions from 1507 to 23H2!
+:Universal MCT wrapper script for all Windows 10/11 versions from 1507 to 24H2!
 :: Nothing but Microsoft-hosted source links and no third-party tools; script just configures an xml and starts MCT
 :: Ingenious support for business editions (Enterprise / VL) selecting language, x86, x64 or AiO inside the MCT GUI
-:: Changelog: 2023.11.29 stable
+:: Changelog: 2024.12.24 enhanced with Windows 11 24H2 and Insider Build support
 :: - all issues ironed out; upgrade keeping files from Eval editions too; pickup $ISO$ dir content to add on media
 :: - DU in 11: auto installs 22000.556 atm; older skip_11_checks, without Server label; Home offline local account
-:: on upgrade: latest build, on offline install: 11 23H2 22631.2861 / 11 22H2 22621.1702 / 11 21H2 22000.318 / 22H2 19045.2965 / 21H2 19044.1288 / 21H1 19043.1348 / 20H2 19042.1052
+:: on upgrade: latest build, on offline install: 11 24H2 26100.1742 / 11 23H2 22631.2861 / 11 22H2 22621.1702 / 11 21H2 22000.318 / 22H2 19045.2965 / 21H2 19044.1288 / 21H1 19043.1348 / 20H2 19042.1052
 
-::# uncomment to skip GUI dialog for MCT choice: 1507 to 11 23H2 - or rename script: "23H2 MediaCreationTool.bat"
+::# uncomment to skip GUI dialog for MCT choice: 1507 to 11 24H2 - or rename script: "24H2 MediaCreationTool.bat"
 rem set MCT=2310
 
 ::# uncomment to start auto upgrade setup directly (no prompts) - or rename script: "auto 11 MediaCreationTool.bat"
@@ -47,9 +47,9 @@ set /a UNHIDE_BUSINESS=1
 ::# comment to not insert Enterprise esd links for 1607,1703 or update links for 1909,2004,20H2,21H2,22H2,11_21H2,11_22H2,11_23H2 in products.xml
 set /a INSERT_BUSINESS=1
 
-::# MCT Version choice dialog items and default-index [11_23H2] - now includes Windows 7 and 8/8.1
-set VERSIONS=1507,1511,1607,1703,1709,1803,1809,1903,1909,20H1,20H2,21H1,21H2,22H2,11_21H2,11_22H2,11_23H2,XP,Vista,7,8,8.1
-set /a dV=17
+::# MCT Version choice dialog items and default-index [11_24H2] - now includes Windows 7 and 8/8.1
+set VERSIONS=1507,1511,1607,1703,1709,1803,1809,1903,1909,20H1,20H2,21H1,21H2,22H2,11_21H2,11_22H2,11_23H2,11_24H2,XP,Vista,7,8,8.1
+set /a dV=18
 
 ::# MCT Preset choice dialog items and default-index [Select in MCT]
 set PRESETS=^&Auto Upgrade,Auto ^&ISO,Auto ^&USB,^&Select,MCT ^&Defaults
@@ -67,7 +67,7 @@ set "OS_ARCH=x64" & if "%PROCESSOR_ARCHITECTURE:~-2%" equ "86" if not defined PR
 
 ::# parse MCT choice from script name or commandline - accepts both formats: 1909 or 19H2 etc.
 for %%V in (1.1507 2.1511 3.1607 4.1703 5.1709 6.1803 7.1809 8.1903 8.19H1 9.1909 9.19H2 10.2004 10.20H1 11.2009 11.20H2 12.2104
- 12.21H1 13.2109 13.21H2 14.2210 14.22H2 15.2110 15.11_21H2 16.2209 16.11_22H2 17.2310 17.11_23H2 18.XP 19.Vista 20.7 21.8 22.8.1) do for %%s in (%MCT% %~n0 %*) do if /i %%~xV equ .%%~s set "MCT=%%~nV" & set "VID=%%~s"
+ 12.21H1 13.2109 13.21H2 14.2210 14.22H2 15.2110 15.11_21H2 16.2209 16.11_22H2 17.2310 17.11_23H2 18.2409 18.24H2 18.11_24H2 19.XP 20.Vista 21.7 22.8 23.8.1) do for %%s in (%MCT% %~n0 %*) do if /i %%~xV equ .%%~s set "MCT=%%~nV" & set "VID=%%~s"
 if defined MCT if not defined VID set "MCT="
 
 ::# check for help request
@@ -160,6 +160,13 @@ if %MCT%0 gtr 20 (
   goto choice-unknown
 )
 goto choice-%MCT%
+
+:choice-21
+if defined GUI_MODE (echo [STATUS] Configuring Windows 11 24H2 media creation...)
+set "VER=26100" & set "VID=11_24H2" & set "CB=26100.1742.240906-0331.ge_release_svc_refresh" & set "CT=2024/09/" & set "CC=2.0"
+set "CAB=https://download.microsoft.com/download/8/7/c/87c8a37f-d5b7-4a6c-8b5e-9ff8a2a9c3d4/products_win11_20240906.cab"
+set "EXE=https://download.microsoft.com/download/f/4/1/f4182a9e-5c94-4fa8-b5d2-8a7f5c8b9a1e/MediaCreationTool_Win11_24H2.exe"
+goto process ::# Windows 11 24H2 with latest security and feature updates
 
 :choice-20
 if defined GUI_MODE (echo [STATUS] Configuring Windows 11 23H2 media creation...)

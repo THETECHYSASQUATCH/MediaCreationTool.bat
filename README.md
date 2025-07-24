@@ -10,7 +10,7 @@ A powerful yet simple Windows deployment automation tool supporting all major Wi
 - **Windows 8** - Volume licensing sources
 - **Windows 8.1** - Volume licensing and software recovery sources
 - **Windows 10** - All versions from 1507 to 22H2 (full MCT support)
-- **Windows 11** - All versions from 21H2 to 23H2 (full MCT support)
+- **Windows 11** - All versions from 21H2 to 24H2 (full MCT support)
 
 ## Enhanced Features
 - **Dynamic URL validation** - Checks download link availability before attempting downloads

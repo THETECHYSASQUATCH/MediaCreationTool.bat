@@ -280,7 +280,8 @@ function Show-VersionDialog {
         "22H2 - Windows 10 2022 Update",
         "11_21H2 - Windows 11 (Original)",
         "11_22H2 - Windows 11 2022 Update",
-        "11_23H2 - Windows 11 2023 Update (Latest)"
+        "11_23H2 - Windows 11 2023 Update",
+        "11_24H2 - Windows 11 2024 Update (Latest)"
     )
     
     $latestVersion = ($versions[-1] -split " - ")[0]
@@ -729,7 +730,7 @@ SUPPORTED VERSIONS:
 - Windows 7 Ultimate SP1
 - Windows 8/8.1
 - Windows 10 (all versions from 1507 to 22H2)
-- Windows 11 (21H2, 22H2, 23H2)
+- Windows 11 (21H2, 22H2, 23H2, 24H2)
 
 COMMAND LINE OPTIONS:
 - -AutoSelectLatest: Enable auto-select mode for this session
