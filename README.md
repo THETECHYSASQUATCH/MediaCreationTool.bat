@@ -1,65 +1,22 @@
-Not just an Universal MediaCreationTool wrapper script with ingenious support for business editions,  
+Enhanced Universal MediaCreationTool with support for Windows XP through Windows 11!  
 <img src="preview.png">  
-A powerful yet simple Windows 7/8/10/11 deployment automation tool as well!  
+A powerful yet simple Windows deployment automation tool supporting all major Windows versions!  
 *If you had no success launching the script so far, this latest version will work*  
 
 ## Supported Windows Versions
-
-This tool now supports downloading and creating installation media for:
-
-**Windows 7**
-- Windows 7 Ultimate SP1 (x64)
-- Direct ISO download from archived sources
-- Legacy hardware compatibility
-
-**Windows 8/8.1** 
-- Windows 8 x64 RTM
-- Windows 8.1 Pro x64
-- Direct ISO download method
-
-**Windows 10**
-- All versions from 1507 to 22H2
-- Full MCT integration with products.xml modification
-- Business editions support
-
-**Windows 11**
-- 21H2, 22H2, and 23H2 releases
-- TPM bypass capabilities built-in
-- Modern hardware optimization
+- **Windows XP** - Guidance and links to legitimate sources (end-of-life)
+- **Windows Vista** - Guidance and links to legitimate sources (end-of-life)  
+- **Windows 7** - Volume licensing and software recovery sources
+- **Windows 8** - Volume licensing sources
+- **Windows 8.1** - Volume licensing and software recovery sources
+- **Windows 10** - All versions from 1507 to 22H2 (full MCT support)
+- **Windows 11** - All versions from 21H2 to 23H2 (full MCT support)
 
 ## Enhanced Features
-
-**Dynamic Download Sources**
-- Multiple fallback download sources for reliability
-- Enhanced error handling with detailed diagnostics
-- Future-proofing with version detection capabilities
-
-**Error Recovery**
-- Automatic fallback to alternative download sources
-- Clear error messages with troubleshooting suggestions
-- Network and firewall guidance
-
-**Usage Examples**
-```batch
-:: Download Windows 11 23H2 ISO
-MediaCreationTool.bat iso 11_23H2
-
-:: Create Windows 10 22H2 auto upgrade media
-auto 22H2 MediaCreationTool.bat
-
-:: Download Windows 7 directly
-Win7 iso MediaCreationTool.bat
-
-:: Download Windows 8.1 with specific language
-Win8.1 de-DE iso MediaCreationTool.bat
-```
-
-**Command Line Options**
-- `auto` - Automatic upgrade mode
-- `iso` - Create ISO directly  
-- `def` - Use default MCT settings (no modifications)
-- `Win7`, `Win8`, `Win8.1` - Legacy Windows support
-- Version identifiers: `1507`, `1903`, `20H2`, `21H2`, `22H2`, `11_21H2`, `11_22H2`, `11_23H2`
+- **Dynamic URL validation** - Checks download link availability before attempting downloads
+- **Improved error handling** - Clear error messages with troubleshooting guidance
+- **Legacy Windows support** - Guidance for obtaining older Windows installation media
+- **User-friendly interface** - Clear instructions for each Windows version choice
 
 Presets
 -------  
@@ -121,6 +78,84 @@ Finally, it sets recommended setup options with least amount of issues on upgrad
 >
 > Can even add a VL / MAK / retail product key in the same way to take care of licensing differences.  
 > The script also picks up any `$ISO$` folder in the current location - for $OEM$ branding, configuration, tweaks etc.  
+
+Legacy Windows Support (XP, Vista, 7, 8, 8.1)
+--------------------------------------------
+For older Windows versions that are no longer supported by Microsoft's Media Creation Tool:
+
+**Windows XP** (End-of-life: April 8, 2014)
+- No longer available from Microsoft  
+- The script provides guidance to legitimate sources:
+  - Original retail/OEM installation media
+  - Volume Licensing Service Center (business customers)
+  - Software preservation archives (archive.org, etc.)
+
+**Windows Vista** (End-of-life: April 11, 2017)  
+- Limited availability from Microsoft Volume Licensing
+- The script provides guidance to legitimate sources
+
+**Windows 7** (End-of-life: January 14, 2020)
+- Available from Microsoft Volume Licensing Service Center
+- Available from Microsoft Software Recovery (with valid product key)
+- Some archived Digital River links (while they still work)
+
+**Windows 8/8.1** (8.1 end-of-life: January 10, 2023)
+- Available from Microsoft Volume Licensing Service Center  
+- Windows 8.1 available from Microsoft Software Recovery (with valid product key)
+
+*Note: All legacy Windows versions should only be used for:*
+- Legacy system support
+- Virtual machines for testing
+- Systems that cannot be upgraded to newer Windows versions
+
+Enhanced Error Handling
+----------------------
+The script now includes improved error handling for download failures:
+- **URL validation** - Checks if download links are accessible before attempting downloads
+- **Clear error messages** - Explains potential causes of download failures
+- **Troubleshooting guidance** - Provides steps to resolve common issues
+- **Alternative sources** - Suggests legitimate alternative download sources when Microsoft links fail
+
+Usage Examples
+--------------
+
+### Modern Windows (Windows 10/11)
+```cmd
+# Run with default settings (Windows 11 23H2)
+MediaCreationTool.bat
+
+# Create Windows 10 22H2 ISO automatically
+rename MediaCreationTool.bat "22H2 iso MediaCreationTool.bat"
+
+# Auto upgrade to Windows 11
+rename MediaCreationTool.bat "auto 11 MediaCreationTool.bat"
+```
+
+### Legacy Windows Versions
+```cmd
+# Get Windows 7 download information and sources
+rename MediaCreationTool.bat "7 MediaCreationTool.bat"
+
+# Get Windows XP guidance and legitimate sources
+rename MediaCreationTool.bat "XP MediaCreationTool.bat"
+
+# Get Windows 8.1 download information
+rename MediaCreationTool.bat "8.1 MediaCreationTool.bat"
+```
+
+### Command Line Usage
+```cmd
+# Specify version directly
+MediaCreationTool.bat 7
+MediaCreationTool.bat XP
+MediaCreationTool.bat 11_23H2
+```
+
+**Important Notes:**
+- Legacy Windows versions provide guidance to legitimate sources only
+- Always verify ISO checksums and use valid Windows licenses
+- Consider virtualization for legacy Windows testing
+- Plan migration to supported Windows versions when possible
 
 Changelog  
 ---------  
