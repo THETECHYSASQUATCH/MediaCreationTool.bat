@@ -48,8 +48,8 @@ set /a UNHIDE_BUSINESS=1
 set /a INSERT_BUSINESS=1
 
 ::# MCT Version choice dialog items and default-index [11_23H2] - now includes Windows 7 and 8/8.1
-set VERSIONS=Win7,Win8,Win8.1,1507,1511,1607,1703,1709,1803,1809,1903,1909,20H1,20H2,21H1,21H2,22H2,11_21H2,11_22H2,11_23H2
-set /a dV=20
+set VERSIONS=1507,1511,1607,1703,1709,1803,1809,1903,1909,20H1,20H2,21H1,21H2,22H2,11_21H2,11_22H2,11_23H2,XP,Vista,7,8,8.1
+set /a dV=17
 
 ::# MCT Preset choice dialog items and default-index [Select in MCT]
 set PRESETS=^&Auto Upgrade,Auto ^&ISO,Auto ^&USB,^&Select,MCT ^&Defaults
@@ -66,9 +66,14 @@ for %%s in (%OS_LANGCODE%) do set "OS_LANGCODE=%%s"
 set "OS_ARCH=x64" & if "%PROCESSOR_ARCHITECTURE:~-2%" equ "86" if not defined PROCESSOR_ARCHITEW6432 set "OS_ARCH=x86"
 
 ::# parse MCT choice from script name or commandline - accepts both formats: 1909 or 19H2 etc.
-for %%V in (1.Win7 2.Win8 3.Win8.1 4.1507 5.1511 6.1607 7.1703 8.1709 9.1803 10.1809 11.1903 11.19H1 12.1909 12.19H2 13.2004 13.20H1 14.2009 14.20H2 15.2104
- 15.21H1 16.2109 16.21H2 17.2210 17.22H2 18.2110 18.11_21H2 19.2209 19.11_22H2 20.2310 20.11_23H2) do for %%s in (%MCT% %~n0 %*) do if /i %%~xV equ .%%~s set "MCT=%%~nV" & set "VID=%%~s"
+for %%V in (1.1507 2.1511 3.1607 4.1703 5.1709 6.1803 7.1809 8.1903 8.19H1 9.1909 9.19H2 10.2004 10.20H1 11.2009 11.20H2 12.2104
+ 12.21H1 13.2109 13.21H2 14.2210 14.22H2 15.2110 15.11_21H2 16.2209 16.11_22H2 17.2310 17.11_23H2 18.XP 19.Vista 20.7 21.8 22.8.1) do for %%s in (%MCT% %~n0 %*) do if /i %%~xV equ .%%~s set "MCT=%%~nV" & set "VID=%%~s"
 if defined MCT if not defined VID set "MCT="
+
+::# check for help request
+for %%s in (%~n0 %*) do if /i %%s equ help goto show_help
+for %%s in (%~n0 %*) do if /i %%s equ /? goto show_help
+for %%s in (%~n0 %*) do if /i %%s equ -h goto show_help
 
 ::# parse AUTO from script name or commandline - starts unattended upgrade / in-place repair / cross-edition
 for %%s in (%~n0 %*) do if /i %%s equ auto set /a AUTO=1
