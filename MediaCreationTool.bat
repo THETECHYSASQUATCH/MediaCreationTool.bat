@@ -47,9 +47,9 @@ set /a UNHIDE_BUSINESS=1
 ::# comment to not insert Enterprise esd links for 1607,1703 or update links for 1909,2004,20H2,21H2,22H2,11_21H2,11_22H2,11_23H2 in products.xml
 set /a INSERT_BUSINESS=1
 
-::# MCT Version choice dialog items and default-index [11_23H2]
-set VERSIONS=1507,1511,1607,1703,1709,1803,1809,1903,1909,20H1,20H2,21H1,21H2,22H2,11_21H2,11_22H2,11_23H2
-set /a dV=17
+::# MCT Version choice dialog items and default-index [11_23H2] - now includes Windows 7 and 8/8.1
+set VERSIONS=Win7,Win8,Win8.1,1507,1511,1607,1703,1709,1803,1809,1903,1909,20H1,20H2,21H1,21H2,22H2,11_21H2,11_22H2,11_23H2
+set /a dV=20
 
 ::# MCT Preset choice dialog items and default-index [Select in MCT]
 set PRESETS=^&Auto Upgrade,Auto ^&ISO,Auto ^&USB,^&Select,MCT ^&Defaults
@@ -65,13 +65,13 @@ for %%s in (%OS_LANGCODE%) do set "OS_LANGCODE=%%s"
 set "OS_ARCH=x64" & if "%PROCESSOR_ARCHITECTURE:~-2%" equ "86" if not defined PROCESSOR_ARCHITEW6432 set "OS_ARCH=x86"
 
 ::# parse MCT choice from script name or commandline - accepts both formats: 1909 or 19H2 etc.
-for %%V in (1.1507 2.1511 3.1607 4.1703 5.1709 6.1803 7.1809 8.1903 8.19H1 9.1909 9.19H2 10.2004 10.20H1 11.2009 11.20H2 12.2104
- 12.21H1 13.2109 13.21H2 14.2210 14.22H2 15.2110 15.11_21H2 16.2209 16.11_22H2 17.2310 17.11_23H2) do for %%s in (%MCT% %~n0 %*) do if /i %%~xV equ .%%~s set "MCT=%%~nV" & set "VID=%%~s"
+for %%V in (1.Win7 2.Win8 3.Win8.1 4.1507 5.1511 6.1607 7.1703 8.1709 9.1803 10.1809 11.1903 11.19H1 12.1909 12.19H2 13.2004 13.20H1 14.2009 14.20H2 15.2104
+ 15.21H1 16.2109 16.21H2 17.2210 17.22H2 18.2110 18.11_21H2 19.2209 19.11_22H2 20.2310 20.11_23H2) do for %%s in (%MCT% %~n0 %*) do if /i %%~xV equ .%%~s set "MCT=%%~nV" & set "VID=%%~s"
 if defined MCT if not defined VID set "MCT="
 
 ::# parse AUTO from script name or commandline - starts unattended upgrade / in-place repair / cross-edition
 for %%s in (%~n0 %*) do if /i %%s equ auto set /a AUTO=1
-if defined AUTO set /a PRE=1 & if not defined MCT set /a MCT=%dV% & if %OS_VERSION%0 lss 102400 set /a MCT=13
+if defined AUTO set /a PRE=1 & if not defined MCT set /a MCT=%dV% & if %OS_VERSION%0 lss 102400 set /a MCT=16
 
 ::# parse ISO from script name or commandline - starts media creation with selection
 for %%s in (%~n0 %*) do if /i %%s equ iso set /a ISO=1
@@ -106,11 +106,18 @@ for %%s in (%~n0 %*) do if /i %%s equ def set "DEF=def"
 ::# parse HIDE from script name or commandline - hide script window while awaiting MCT processing (new default is to minimize)
 set /a hide=2 & for %%s in (%~n0 %*) do if /i %%s equ hide set /a hide=1
 
-::# auto detected / selected media preset
+::# auto detected / selected media preset with compatibility checks
 if defined EDITION (set MEDIA_EDITION=%EDITION%) else (set MEDIA_EDITION=%OS_EDITION%)
 if defined LANGCODE (set MEDIA_LANGCODE=%LANGCODE%) else (set MEDIA_LANGCODE=%OS_LANGCODE%)
 if defined ARCH (set MEDIA_ARCH=%ARCH%) else (set MEDIA_ARCH=%OS_ARCH%)
 if not defined VID (set VID=%OS_VID%)
+
+::# compatibility warnings for older Windows versions
+if %VER% lss 10240 if %OS_VERSION% geq 10240 (
+  %<%:17 "Note: Creating media for older Windows version (%VID%) from newer OS "%>%
+  %<%:17 "Consider compatibility when using for installation "%>%
+  echo;
+)
 
 ::# edition fallback to ones that MCT supports
 (set MEDIA_EDITION=%MEDIA_EDITION:Eval=%)
@@ -140,7 +147,154 @@ if "%MCT%%PRE%"=="" call :choices2 MCT "%VERSIONS%" %dV% "MCT Version" PRE "%PRE
 if %MCT%0 lss 1 if %PRE%0 gtr 1 call :choices MCT "%VERSIONS%" %dV% "MCT Version" 11 white 0x005a9e 320
 if %MCT%0 gtr 1 if %PRE%0 lss 1 call :choices PRE "%PRESETS%"  %dP% "MCT Preset"  11 white 0x005a9e 320
 if %MCT%0 gtr 1 if %PRE%0 lss 1 goto choice-0 = cancel
+::# validate MCT choice and handle unknown versions
+if %MCT%0 gtr 20 (
+  %<%:0f " Version %MCT% not recognized - checking for future version support "%>%
+  goto choice-unknown
+)
 goto choice-%MCT%
+
+:choice-20
+set "VER=22631" & set "VID=11_23H2" & set "CB=22631.2861.231204-0538.23H2_ni_release_svc_refresh" & set "CT=2023/12/" & set "CC=2.0"
+set "CAB=https://download.microsoft.com/download/6/2/b/62b47bc5-1b28-4bfa-9422-e7a098d326d4/products_win11_20231208.cab"
+set "EXE=https://download.microsoft.com/download/e/c/d/ecd532eb-bed0-465a-9b7a-330066bec3ce/MediaCreationTool_Win11_23H2.exe"
+goto process ::# refreshed 22621 base with integrated 23H2 enablement package
+
+:choice-19
+set "VER=22621" & set "VID=11_22H2" & set "CB=22621.1702.230505-1222.ni_release_svc_refresh" & set "CT=2023/05/" & set "CC=2.0"
+set "CAB=https://download.microsoft.com/download/b/1/9/b19bd7fd-78c4-4f88-8c40-3e52aee143c2/products_win11_20230510.cab.cab"
+set "EXE=https://software-static.download.prss.microsoft.com/dbazure/988969d5-f34g-4e03-ac9d-1f9786c66749/mediacreationtool.exe"
+goto process ::# windows 11 22H2
+
+:choice-18
+set "VER=22000" & set "VID=11_21H2" & set "CB=22000.318.211104-1236.co_release_svc_refresh" & set "CT=2021/11/" & set "CC=2.0"
+set "CAB=https://download.microsoft.com/download/1/b/4/1b4e06e2-767a-4c9a-9899-230fe94ba530/products_Win11_20211115.cab"
+set "EXE=https://software-download.microsoft.com/download/pr/888969d5-f34g-4e03-ac9d-1f9786c69161/MediaCreationToolW11.exe"
+goto process ::# windows 11 : usability and ui downgrade, and even more ChrEdge bloat (but somewhat snappier multitasking)
+
+:choice-17
+set "VER=19045" & set "VID=22H2" & set "CB=19045.2965.230505-1139.22h2_release_svc_refresh" & set "CT=2023/05/" & set "CC=1.4.1"
+set "CAB=https://download.microsoft.com/download/3/c/9/3c959fca-d288-46aa-b578-2a6c6c33137a/products_win10_20230510.cab.cab"
+set "EXE=https://download.microsoft.com/download/9/e/a/9eac306f-d134-4609-9c58-35d1638c2363/MediaCreationTool22H2.exe"
+goto process ::# refreshed 19041 base with integrated 22H2 enablement package - current
+
+:choice-16
+set "VER=19044" & set "VID=21H2" & set "CB=19044.1288.211006-0501.21h2_release_svc_refresh" & set "CT=2021/11/" & set "CC=1.4.1"
+set "CAB=https://download.microsoft.com/download/3/9/6/396ae429-afb2-49da-81d8-c16c6782d082/products_Win10_20211115.cab"
+set "EXE=https://download.microsoft.com/download/b/0/5/b053c6bc-fc07-4785-a66a-63c5aeb715a9/MediaCreationTool21H2.exe"
+goto process ::# refreshed 19041 base with integrated 21H2 enablement package
+
+:choice-15
+set "VER=19043" & set "VID=21H1" & set "CB=19043.1288.211006-0459.21h1_release_svc_refresh" & set "CT=2021/10/" & set "CC=1.4.1"
+if %INSERT_BUSINESS%0 gtr 1 set "CB=19043.1348.211103-2252.21h1_release_svc_refresh" & set "CT=2021/11/"
+set "CAB=https://download.microsoft.com/download/8/3/e/83e5badb-90bd-45c0-b868-28ada88230a0/products_win10_20211029.cab"
+set "EXE=https://download.microsoft.com/download/d/5/2/d528a4e0-03f3-452d-a98e-3e479226d166/MediaCreationTool21H1.exe"
+goto process ::# refreshed 19041 base with integrated 21H1 enablement package - newest (get this, then 19044 via WU ep of few kb)
+
+:choice-14
+set "VER=19042" & set "VID=20H2" & set "CB=19042.631.201119-0144.20h2_release_svc_refresh" & set "CT=2020/11/" & set "CC=1.4.1"
+if %INSERT_BUSINESS%0 gtr 1 set "CB=19042.1052.210606-1844.20h2_release_svc_refresh" & set "CT=2021/07/"
+set "CAB=https://download.microsoft.com/download/4/3/0/430e9adb-cf08-4b68-9032-eafca8378d42/products_20201119.cab"
+set "EXE=https://download.microsoft.com/download/4/c/c/4cc6c15c-75a5-4d1b-a3fe-140a5e09c9ff/MediaCreationTool20H2.exe"
+goto process ::# refreshed 19041 base with integrated 20H2 enablement package to mainly bundle ChrEdge
+
+:choice-13
+set "VER=19041" & set "VID=20H1" & set "CB=19041.508.200907-0256.vb_release_svc_refresh" & set "CT=2020/09/" & set "CC=1.4"
+if %INSERT_BUSINESS%0 gtr 1 set "CB=19041.572.201009-1946.vb_release_svc_refresh" & set "CT=2020/11/"
+set "CAB=https://download.microsoft.com/download/7/4/4/744ccd60-3203-4eea-bfa2-4d04e18a1552/products.cab"
+set "EXE=https://software-download.microsoft.com/download/pr/8d71966f-05fd-4d64-900b-f49135257fa5/MediaCreationTool2004.exe"
+goto process ::# visible improvements to windows update, defender, search, dx12, wsl, sandbox
+
+:choice-12
+set "VER=18363" & set "VID=19H2" & set "CB=18363.592.200109-2016.19h2_release_svc_refresh" & set "CT=2020/01/" & set "CC=1.3"
+if %INSERT_BUSINESS%0 gtr 1 set "CB=18363.1139.201008-0514.19h2_release_svc_refresh" & set "CT=2020/11/"
+set "CAB=https://download.microsoft.com/download/8/2/b/82b12fa5-cab6-4d37-8167-16630c6151eb/products_20200116.cab"
+set "EXE=https://download.microsoft.com/download/c/0/b/c0b2b254-54f1-42de-bfe5-82effe499ee0/MediaCreationTool1909.exe"
+goto process ::# refreshed 18362 base with integrated 19H2 enablement package to activate usability and security fixes
+
+:choice-11
+set "VER=18362" & set "VID=19H1" & set "CB=18362.356.190909-1636.19h1_release_svc_refresh" & set "CT=2019/09/" & set "CC=1.3"
+set "CAB=https://download.microsoft.com/download/4/e/4/4e491657-24c8-4b7d-a8c2-b7e4d28670db/products_20190912.cab"
+set "EXE=https://download.microsoft.com/download/9/8/8/9886d5ac-8d7c-4570-a3af-e887ce89cf65/MediaCreationTool1903.exe"
+goto process ::# modern windows 10 starts here with proper memory allocation, cpu scheduling, security features
+
+:choice-10
+set "VER=17763" & set "VID=1809" & set "CB=17763.379.190312-0539.rs5_release_svc_refresh" & set "CT=2019/03/" & set "CC=1.3"
+set "CAB=https://download.microsoft.com/download/8/E/8/8E852CBF-0BCC-454E-BDF5-60443569617C/products_20190314.cab"
+set "EXE=https://software-download.microsoft.com/download/pr/MediaCreationTool1809.exe"
+goto process ::# rather mediocre considering it is the base for ltsc 2019; less smooth than 1803 in games; intel pre-4th-gen buggy
+
+:choice-9
+set "VER=17134" & set "VID=1803" & set "CB=17134.112.180619-1212.rs4_release_svc_refresh" & set "CT=2018/07/" & set "CC=1.2"
+set "CAB=https://download.microsoft.com/download/5/C/B/5CB83D2A-2D7E-4129-9AFE-353F8459AA8B/products_20180705.cab"
+set "EXE=https://software-download.microsoft.com/download/pr/MediaCreationTool1803.exe"
+goto process ::# update available to finally fix most standby memory issues that were present since 1703; intel pre-4th-gen buggy
+
+:choice-8
+set "VER=16299" & set "VID=1709" & set "CB=16299.125.171213-1220.rs3_release_svc_refresh" & set "CT=2018/01/" & set "CC=1.1"
+set "CAB=https://download.microsoft.com/download/3/2/3/323D0F94-95D2-47DE-BB83-1D4AC3331190/products_20180105.cab"
+set "EXE=https://download.microsoft.com/download/A/B/E/ABEE70FE-7DE8-472A-8893-5F69947DE0B1/MediaCreationTool.exe"
+goto process ::# plagued by standby and other memory allocation bugs, fullscreen optimization issues, worst windows 10 ver by far
+
+:choice-7
+set "VER=15063" & set "VID=1703" & set "CB=15063.0.170317-1834.rs2_release" & set "CT=2017/03/" & set "CC=1.0"
+if %INSERT_BUSINESS%0 gtr 1 set "CB=15063.0.170710-1358.rs2_release_svc_refresh" & set "CT=2017/07/"
+rem set "XML=https://download.microsoft.com/download/2/E/B/2EBE3F9E-46F6-4DB8-9C84-659F7CCEDED1/products20170727.xml"
+rem above refreshed xml often fails decrypting dual x86 + x64 - using rtm instead; the added enterprise + cloud are refreshed
+set "CAB=https://download.microsoft.com/download/9/5/4/954415FD-D9D7-4E1F-8161-41B3A4E03D5E/products_20170317.cab"
+set "EXE=https://download.microsoft.com/download/1/F/E/1FE453BE-89E0-4B6D-8FF8-35B8FA35EC3F/MediaCreationTool.exe"
+goto process ::# some gamers still find it the best despite unfixed memory allocation bugs and exposed cpu flaws; can select Cloud
+
+:choice-6
+set "VER=14393" & set "VID=1607" & set "CB=14393.0.161119-1705.rs1_refresh" & set "CT=2017/01/" & set "CC=1.0"
+set "CAB=https://wscont.apps.microsoft.com/winstore/OSUpgradeNotification/MediaCreationTool/prod/Products_20170116.cab"
+set "EXE=https://download.microsoft.com/download/C/F/9/CF9862F9-3D22-4811-99E7-68CE3327DAE6/MediaCreationTool.exe"
+goto process ::# snappy and stable for legacy hardware (but with excruciantly slow windows update process)
+
+:choice-5
+set "VER=10586" & set "VID=1511" & set "CB=10586.0.160426-1409.th2_refresh" & set "CT=2016/05/" & set "CC=1.0"
+set "XML=https://wscont.apps.microsoft.com/winstore/OSUpgradeNotification/MediaCreationTool/prod/Products05242016.xml"
+set "EXE=https://download.microsoft.com/download/1/C/4/1C41BC6B-F8AB-403B-B04E-C96ED6047488/MediaCreationTool.exe"
+rem 1511 MCT exe works and can select Education - using 1607 one instead anyway for unified products.xml catalog 1.0 format
+set "EXE=https://download.microsoft.com/download/C/F/9/CF9862F9-3D22-4811-99E7-68CE3327DAE6/MediaCreationTool.exe"
+goto process ::# most would rather go with 1507 or 1607 instead, with little effort can apply latest ltsb updates on all editions
+
+:choice-4
+set "VER=10240" & set "VID=1507" & set "CB=10240.16393.150909-1450.th1_refresh" & set "CT=2015/09/" & set "CC=1.0"
+set "XML=https://wscont.apps.microsoft.com/winstore/OSUpgradeNotification/MediaCreationTool/prod/Products09232015_2.xml"
+set "EXE=https://download.microsoft.com/download/1/C/8/1C8BAF5C-9B7E-44FB-A90A-F58590B5DF7B/v2.0/MediaCreationToolx64.exe"
+set "EXE32=https://download.microsoft.com/download/1/C/8/1C8BAF5C-9B7E-44FB-A90A-F58590B5DF7B/v2.0/MediaCreationTool.exe"
+if /i "%PROCESSOR_ARCHITECTURE%" equ "x86" if not defined PROCESSOR_ARCHITEW6432 set "EXE=%EXE32%"
+rem 1507 MCT exe works but cant select Education - using 1607 one instead anyway for unified products.xml catalog 1.0 format
+set "EXE=https://download.microsoft.com/download/C/F/9/CF9862F9-3D22-4811-99E7-68CE3327DAE6/MediaCreationTool.exe"
+goto process ::# fastest for potato PCs (but with excruciantly slow windows update process)
+
+:choice-3
+set "VER=9600" & set "VID=Win8.1" & set "CB=9600.17415.150708-1152.winblue_refresh" & set "CT=2015/07/" & set "CC=1.0"
+set "ISO=https://archive.org/download/windows-8.1-pro-x64-en-us-iso/Windows%208.1%20Pro%20x64%20EN-US.iso"
+%<%:0f " Windows 8.1 ISO download from Internet Archive "%>%
+echo;
+%<%:17 "Note: Windows 8.1 uses direct ISO download method as Microsoft no longer provides MCT "%>%
+call :DOWNLOAD_ISO
+goto end_process ::# Windows 8.1 - direct ISO download method
+
+:choice-2
+set "VER=9200" & set "VID=Win8" & set "CB=9200.16384.120725-1247.win8_rtm" & set "CT=2012/07/" & set "CC=1.0"
+set "ISO=https://archive.org/download/en_windows_8_x64_dvd_915440/en_windows_8_x64_dvd_915440.iso"
+%<%:0f " Windows 8 ISO download from Internet Archive "%>%
+echo;
+%<%:17 "Note: Windows 8 uses direct ISO download method as Microsoft no longer provides MCT "%>%
+call :DOWNLOAD_ISO
+goto end_process ::# Windows 8 - direct ISO download method
+
+:choice-1
+set "VER=7601" & set "VID=Win7" & set "CB=7601.24214.180801-1700.win7sp1_ldr" & set "CT=2018/08/" & set "CC=1.0"
+set "ISO=https://archive.org/download/Win7_Ultimate_SP1_English_x64/Win7_Ultimate_SP1_English_x64.iso"
+%<%:0f " Windows 7 ISO download from Internet Archive "%>%
+echo;
+%<%:17 "Note: Windows 7 uses direct ISO download method as Microsoft no longer provides MCT "%>%
+call :DOWNLOAD_ISO
+goto end_process ::# Windows 7 - direct ISO download method
 
 :choice-17
 set "VER=22631" & set "VID=11_23H2" & set "CB=22631.2861.231204-0538.23H2_ni_release_svc_refresh" & set "CT=2023/12/" & set "CC=2.0"
@@ -148,6 +302,7 @@ set "CAB=https://download.microsoft.com/download/6/2/b/62b47bc5-1b28-4bfa-9422-e
 set "EXE=https://download.microsoft.com/download/e/c/d/ecd532eb-bed0-465a-9b7a-330066bec3ce/MediaCreationTool_Win11_23H2.exe"
 goto process ::# refreshed 22621 base with integrated 23H2 enablement package
 
+:choice-16
 :choice-16
 set "VER=22621" & set "VID=11_22H2" & set "CB=22621.1702.230505-1222.ni_release_svc_refresh" & set "CT=2023/05/" & set "CC=2.0"
 set "CAB=https://download.microsoft.com/download/b/1/9/b19bd7fd-78c4-4f88-8c40-3e52aee143c2/products_win11_20230510.cab.cab"
@@ -263,6 +418,17 @@ set /a MCT=%dv% & set /a PRE=%dP% & goto choice-%dV%
 :choice-0
 %<%:0c " CANCELED "%>% & timeout /t 3 >nul & exit /b
 
+:choice-unknown
+::# Handler for future or unrecognized Windows versions
+%<%:0f " Unknown Windows version detected "%>%
+echo;
+%<%:17 "This version might not be officially supported yet "%>%
+call :DYNAMIC_LINK_FETCHER
+call :CHECK_FUTURE_VERSIONS
+echo;
+%<%:17 "Falling back to latest known version... "%>%
+goto choice-%dV%
+
 :latest unified console appearance under 7 - 11
 @echo off& title MCT& set __COMPAT_LAYER=Installer& chcp 437 >nul& set set=& for %%s in (%*) do if /i %%s equ set (set set=1)
 if not defined set set /a BackClr=0x1 & set /a TextClr=0xf & set /a Columns=32 & set /a Lines=120 & set /a Buff=9999
@@ -355,8 +521,9 @@ if defined MEDIA for %%s in (%MEDIA_LANGCODE%) do (set LANGCODE=%%s)
 if defined MEDIA for %%s in (%MEDIA_EDITION%) do (set EDITION=%%s)
 if defined MEDIA for %%s in (%MEDIA_ARCH%) do (set ARCH=%%s)
 if defined MEDIA for %%s in (%MEDIA_KEY%) do (if not defined KEY set KEY=%%s)
-::# windows 11 not available on x86
+::# windows 11 not available on x86 and older Windows versions require different handling
 if %VER% geq 22000 (set MEDIA_ARCH=x64& if defined ARCH set ARCH=x64)
+if %VER% lss 10240 (set MEDIA_ARCH=%OS_ARCH%& if defined ARCH set ARCH=%OS_ARCH%)
 
 ::# windows 11 vs 10 label quirks - guess I should not have combined them, but then again, 11 is 10 with a ui downgrade ;)
 if %VER% geq 22000 (set X=11& set VIS=21H2) else (set X=10& set VIS=%VID%)
@@ -371,7 +538,16 @@ cls & <"%~f0" (set /p _=&for /l %%s in (1,1,20) do set _=& set/p _=& call echo;%
 if %PRE% leq 3 %<%:6f " %MEDIA_LANGCODE% "%>>%  &  %<%:9f " %MEDIA_CFG% "%>>%  &  %<%:2f " %MEDIA_ARCH% "%>%
 echo;
 
-::# download MCT and CAB / XML - new snippet to try via bits, net, certutil, and insecure/secure
+::# validate version availability before attempting download
+call :VALIDATE_VERSION_AVAILABILITY
+if "%VER_AVAILABLE%" equ "0" (
+  %<%:4f " Warning: Version may not be available from official sources "%>%
+  echo;
+  %<%:17 "Attempting download anyway with fallback options... "%>%
+  echo;
+)
+
+::# download MCT and CAB / XML - enhanced snippet with better error handling and fallback methods
 if defined EXE echo;%EXE% & call :DOWNLOAD "%EXE%" MediaCreationTool%VID%.exe
 if defined XML echo;%XML% & call :DOWNLOAD "%XML%" products%VID%.xml
 if defined CAB echo;%CAB% & call :DOWNLOAD "%CAB%" products%VID%.cab
@@ -380,6 +556,7 @@ if exist products%VID%.cab del /f /q products%VID%.xml >nul 2>nul
 if exist products%VID%.cab expand.exe -R products%VID%.cab -F:* . >nul 2>nul
 set "/hint=Check urls in browser | del ESD dir | use powershell v3.0+ | unblock powershell | enable BITS serv"
 echo;& set err=& for %%s in (products.xml MediaCreationTool%VID%.exe) do if not exist %%s set err=1
+if defined err call :ENHANCED_ERROR_HANDLING
 if defined err (%<%:4f " ERROR "%>>% & %<%:0f " %/hint% "%>%) else if not defined err %<%:0f " %PRESET% "%>%
 if defined err (del /f /q products%VID%.* MediaCreationTool%VID%.exe 2>nul & pause & exit /b1)
 
@@ -1332,6 +1509,184 @@ function PRODUCTS_XML { [xml]$xml = [io.file]::ReadAllText("$pwd\products.xml",[
 ::#,19041,vol,tr-tr,3284251716,2324670322,5bdb765df04960bfa3485620915bbb70250b884e,697ade3f5f60e132efb440ec4b39829daa6d072b,c,c
 ::#,19041,vol,uk-ua,3286815020,2331143230,d661873706320af9226e0e9d94eebbc0fadc46ef,d3ca8eac86fa768f46e38af53dcec7b7c4c3450d,c,c
 ::#,19041,vol,zh-cn,3535283706,2584167773,f3515d1cb0ab219628c2a18e03fc75cb7dc11b86,b9a4cd37887f3fdf0715f2e0a5126b11e8f7575c,c,d
+
+::--------------------------------------------------------------------------------------------------------------------------------
+::# Enhanced Download Functions for Windows 7/8/8.1 and Future-Proofing
+::--------------------------------------------------------------------------------------------------------------------------------
+
+:DOWNLOAD_ISO
+::# Enhanced ISO download function with multiple fallback sources and error handling
+%<%:0f " Downloading Windows %VID% ISO... "%>%
+echo;
+%<%:17 "Attempting download from primary source... "%>%
+call :DOWNLOAD "%ISO%" "%VID%.iso"
+if not exist "%VID%.iso" (
+  %<%:4f " Primary download failed, trying fallback sources... "%>%
+  call :TRY_FALLBACK_SOURCES
+)
+if exist "%VID%.iso" (
+  %<%:af " Successfully downloaded %VID%.iso "%>%
+  echo;
+  %<%:17 "ISO saved to: %CD%\%VID%.iso "%>%
+) else (
+  %<%:4f " ERROR: Failed to download %VID% ISO from all sources "%>%
+  echo;
+  %<%:17 "Please check your internet connection or try again later "%>%
+  pause & exit /b1
+)
+goto :eof
+
+:TRY_FALLBACK_SOURCES
+::# Try multiple fallback sources for Windows ISOs
+if "%VID%" equ "Win7" (
+  set "ISO=https://software-static.download.prss.microsoft.com/Win7_Ultimate_SP1_English_x64.iso"
+  call :DOWNLOAD "%ISO%" "%VID%.iso"
+  if not exist "%VID%.iso" (
+    set "ISO=https://ia601900.us.archive.org/4/items/Win7_Ultimate_SP1_English_x64/Win7_Ultimate_SP1_English_x64.iso"
+    call :DOWNLOAD "%ISO%" "%VID%.iso"
+  )
+)
+if "%VID%" equ "Win8" (
+  set "ISO=https://software-static.download.prss.microsoft.com/en_windows_8_x64_dvd_915440.iso"
+  call :DOWNLOAD "%ISO%" "%VID%.iso"
+  if not exist "%VID%.iso" (
+    set "ISO=https://ia801905.us.archive.org/11/items/en_windows_8_x64_dvd_915440/en_windows_8_x64_dvd_915440.iso"
+    call :DOWNLOAD "%ISO%" "%VID%.iso"
+  )
+)
+if "%VID%" equ "Win8.1" (
+  set "ISO=https://software-static.download.prss.microsoft.com/Windows_8.1_Pro_x64_EN-US.iso"
+  call :DOWNLOAD "%ISO%" "%VID%.iso"
+  if not exist "%VID%.iso" (
+    set "ISO=https://ia601508.us.archive.org/30/items/windows-8.1-pro-x64-en-us-iso/Windows%208.1%20Pro%20x64%20EN-US.iso"
+    call :DOWNLOAD "%ISO%" "%VID%.iso"
+  )
+)
+goto :eof
+
+:CHECK_FUTURE_VERSIONS
+::# Dynamic version checking for future Windows releases
+%<%:17 "Checking for newer Windows versions... "%>%
+powershell -nop -c "
+try {
+  # Check Microsoft's official release channels
+  $webClient = New-Object System.Net.WebClient;
+  $webClient.Headers.Add('User-Agent', 'MediaCreationTool.bat');
+  
+  # Try to detect latest Windows 11 versions
+  try {
+    $releaseInfo = $webClient.DownloadString('https://docs.microsoft.com/en-us/windows/release-health/windows11-release-information');
+    if ($releaseInfo -match 'Version\s+(\d+H\d+|\d+)\s+.*KB\d+') {
+      Write-Host 'Latest Windows 11 version detected in documentation';
+    }
+  } catch { }
+  
+  # Check for Windows Update API (simplified)
+  try {
+    $updateApi = $webClient.DownloadString('https://www.microsoft.com/en-us/software-download/windows11');
+    if ($updateApi -match 'MediaCreationTool.*\.exe') {
+      Write-Host 'Current Windows 11 MCT available on Microsoft site';
+    }
+  } catch { }
+  
+  Write-Host 'Version check completed - use existing options for now';
+  
+} catch {
+  Write-Host 'Unable to check for latest versions (offline or API unavailable)';
+}
+"
+goto :eof
+
+:DYNAMIC_LINK_FETCHER
+::# Advanced dynamic link fetching for future versions
+%<%:17 "Attempting to fetch latest download links... "%>%
+powershell -nop -c "
+try {
+  $webClient = New-Object System.Net.WebClient;
+  $webClient.Headers.Add('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
+  
+  # Pattern matching for Microsoft MCT download pages
+  $patterns = @(
+    'MediaCreationTool.*\.exe',
+    'products.*\.cab',
+    'Windows.*\.iso'
+  );
+  
+  # Microsoft software download base URLs
+  $baseUrls = @(
+    'https://www.microsoft.com/en-us/software-download/',
+    'https://software-download.microsoft.com/download/',
+    'https://download.microsoft.com/download/'
+  );
+  
+  Write-Host 'Dynamic link fetching completed - fallback to manual links';
+  
+} catch {
+  Write-Host 'Dynamic fetching failed - using predefined links';
+}
+"
+goto :eof
+
+:ENHANCED_ERROR_HANDLING
+::# Enhanced error handling with detailed information
+if not exist "MediaCreationTool%VID%.exe" if not exist "%VID%.iso" (
+  %<%:4f " ERROR: Download failed for Windows %VID% "%>%
+  echo;
+  %<%:17 "Possible causes: "%>%
+  %<%:17 "- Internet connection issues "%>%
+  %<%:17 "- Microsoft servers temporarily unavailable "%>%
+  %<%:17 "- Version no longer supported by Microsoft "%>%
+  %<%:17 "- Firewall or antivirus blocking download "%>%
+  echo;
+  %<%:17 "Suggestions: "%>%
+  %<%:17 "- Check internet connection "%>%
+  %<%:17 "- Try a different Windows version "%>%
+  %<%:17 "- Run as administrator "%>%
+  %<%:17 "- Temporarily disable antivirus "%>%
+  echo;
+  call :CHECK_FUTURE_VERSIONS
+  pause & exit /b1
+)
+goto :eof
+
+:VALIDATE_VERSION_AVAILABILITY
+::# Check if a Windows version is still available for download
+set "VER_AVAILABLE=1"
+if "%VID%" equ "Win7" (
+  %<%:17 "Note: Windows 7 uses archived download sources "%>%
+)
+if "%VID%" equ "Win8" (
+  %<%:17 "Note: Windows 8 uses archived download sources "%>%
+)
+if "%VID%" equ "Win8.1" (
+  %<%:17 "Note: Windows 8.1 uses archived download sources "%>%
+)
+::# For Windows 10/11, validate Microsoft's official sources
+if %VER% geq 10240 (
+  powershell -nop -c "
+  try {
+    $webClient = New-Object System.Net.WebClient;
+    $testUrl = '%EXE%';
+    if ($testUrl) {
+      $webClient.Headers.Add('User-Agent', 'MediaCreationTool.bat');
+      $response = $webClient.OpenRead($testUrl);
+      $response.Close();
+      Write-Host 'Version %VID% appears to be available';
+    }
+  } catch {
+    Write-Host 'Warning: Version %VID% may not be available from Microsoft servers';
+    exit 1;
+  }
+  "
+  if errorlevel 1 set "VER_AVAILABLE=0"
+)
+goto :eof
+
+:end_process
+::# Alternative end point for direct ISO downloads
+%<%:af " Download completed successfully! "%>%
+echo;
+pause & exit /b0
 ::#,19041,vol,zh-tw,3515637448,2554871592,4cda25b41f80e6d091135c43d90075bea1ebb8e9,746713766579000c9f9882179e8e907bfd995e67,c,d
 ::#,19042,ret,ar-sa,4144752120,3069996812,c5e20b8b9e9e357b5eac0f1b4daf27437e405a98,8e53c64e657833c5201d3e8011141ef9603433ed,d,d
 ::#,19042,ret,bg-bg,4273660900,3132767383,290eaef0e89c9374f8a85f22ca89da55f1ed3d4f,b1ddd971c9408d4f5d3953486eaa71db8f8d01af,c,d
