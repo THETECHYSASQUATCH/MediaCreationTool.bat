@@ -3,6 +3,7 @@ setlocal
 
 :: MediaCreationTool.bat GUI Launcher
 :: This file launches the PowerShell GUI for MediaCreationTool.bat
+:: Usage: Start-GUI.bat [-AutoSelectLatest | /AutoSelectLatest | --auto-latest]
 
 title MediaCreationTool.bat GUI Launcher
 
@@ -36,7 +37,7 @@ if not exist "%~dp0MediaCreationTool.bat" (
 
 :: Launch the PowerShell GUI
 echo Launching GUI interface...
-powershell -ExecutionPolicy Bypass -File "%~dp0MediaCreationTool.GUI.ps1"
+powershell -ExecutionPolicy Bypass -File "%~dp0MediaCreationTool.GUI.ps1" %*
 
 :: Check for errors
 if errorlevel 1 (
