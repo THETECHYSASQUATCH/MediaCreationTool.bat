@@ -116,6 +116,47 @@ The script now includes improved error handling for download failures:
 - **Troubleshooting guidance** - Provides steps to resolve common issues
 - **Alternative sources** - Suggests legitimate alternative download sources when Microsoft links fail
 
+Usage Examples
+--------------
+
+### Modern Windows (Windows 10/11)
+```cmd
+# Run with default settings (Windows 11 23H2)
+MediaCreationTool.bat
+
+# Create Windows 10 22H2 ISO automatically
+rename MediaCreationTool.bat "22H2 iso MediaCreationTool.bat"
+
+# Auto upgrade to Windows 11
+rename MediaCreationTool.bat "auto 11 MediaCreationTool.bat"
+```
+
+### Legacy Windows Versions
+```cmd
+# Get Windows 7 download information and sources
+rename MediaCreationTool.bat "7 MediaCreationTool.bat"
+
+# Get Windows XP guidance and legitimate sources
+rename MediaCreationTool.bat "XP MediaCreationTool.bat"
+
+# Get Windows 8.1 download information
+rename MediaCreationTool.bat "8.1 MediaCreationTool.bat"
+```
+
+### Command Line Usage
+```cmd
+# Specify version directly
+MediaCreationTool.bat 7
+MediaCreationTool.bat XP
+MediaCreationTool.bat 11_23H2
+```
+
+**Important Notes:**
+- Legacy Windows versions provide guidance to legitimate sources only
+- Always verify ISO checksums and use valid Windows licenses
+- Consider virtualization for legacy Windows testing
+- Plan migration to supported Windows versions when possible
+
 Changelog  
 ---------  
 _No need to right-click Run as Admin, script will ask itself. Directly saving the Raw files no longer breaks line endings_  

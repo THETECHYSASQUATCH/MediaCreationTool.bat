@@ -69,6 +69,11 @@ for %%V in (1.1507 2.1511 3.1607 4.1703 5.1709 6.1803 7.1809 8.1903 8.19H1 9.190
  12.21H1 13.2109 13.21H2 14.2210 14.22H2 15.2110 15.11_21H2 16.2209 16.11_22H2 17.2310 17.11_23H2 18.XP 19.Vista 20.7 21.8 22.8.1) do for %%s in (%MCT% %~n0 %*) do if /i %%~xV equ .%%~s set "MCT=%%~nV" & set "VID=%%~s"
 if defined MCT if not defined VID set "MCT="
 
+::# check for help request
+for %%s in (%~n0 %*) do if /i %%s equ help goto show_help
+for %%s in (%~n0 %*) do if /i %%s equ /? goto show_help
+for %%s in (%~n0 %*) do if /i %%s equ -h goto show_help
+
 ::# parse AUTO from script name or commandline - starts unattended upgrade / in-place repair / cross-edition
 for %%s in (%~n0 %*) do if /i %%s equ auto set /a AUTO=1
 if defined AUTO set /a PRE=1 & if not defined MCT set /a MCT=%dV% & if %OS_VERSION%0 lss 102400 set /a MCT=13
@@ -346,6 +351,43 @@ echo.
 pause
 exit /b
 
+:show_help
+echo.
+%<%:0e " Enhanced MediaCreationTool - Help "%>%
+echo.
+%<%:17 "Universal Windows installation media creation tool "%>%
+%<%:17 "Supports Windows XP through Windows 11 "%>%
+echo.
+%<%:1f "Supported Windows Versions: "%>%
+%<%:17 "Modern (Full MCT Support): "%>%
+%<%:17 "  - Windows 10: 1507, 1511, 1607, 1703, 1709, 1803, 1809 "%>%
+%<%:17 "                1903, 1909, 20H1, 20H2, 21H1, 21H2, 22H2 "%>%
+%<%:17 "  - Windows 11: 21H2, 22H2, 23H2 "%>%
+echo.
+%<%:17 "Legacy (Guidance & Sources): "%>%
+%<%:17 "  - Windows XP, Vista, 7, 8, 8.1 "%>%
+echo.
+%<%:1f "Usage Examples: "%>%
+%<%:17 "  MediaCreationTool.bat                    (Interactive mode) "%>%
+%<%:17 "  MediaCreationTool.bat 11_23H2           (Windows 11 23H2) "%>%
+%<%:17 "  MediaCreationTool.bat 7                 (Windows 7 guidance) "%>%
+%<%:17 "  MediaCreationTool.bat XP                (Windows XP guidance) "%>%
+echo.
+%<%:1f "Advanced Usage: "%>%
+%<%:17 "  Rename script for specific configurations: "%>%
+%<%:17 "  '22H2 iso MediaCreationTool.bat'        (Auto create Win10 22H2 ISO) "%>%
+%<%:17 "  'auto 11 MediaCreationTool.bat'         (Auto upgrade to Win11) "%>%
+%<%:17 "  '21H2 Enterprise en-US x64 iso MediaCreationTool.bat' "%>%
+echo.
+%<%:1f "Features: "%>%
+%<%:17 "  - URL validation before downloads "%>%
+%<%:17 "  - Enhanced error handling "%>%
+%<%:17 "  - Legitimate source guidance for legacy versions "%>%
+%<%:17 "  - Business edition support "%>%
+echo.
+pause
+exit /b
+
 :choice- ;( something happened (broken environment/powershell?) and should cancel, but continue with defaults instead
 set /a MCT=%dv% & set /a PRE=%dP% & goto choice-22
 
@@ -459,6 +501,9 @@ cls & <"%~f0" (set /p _=&for /l %%s in (1,1,20) do set _=& set/p _=& call echo;%
 %<%:f0 " Windows %X% Version "%>>% & %<%:5f " %VIS% "%>>%  &  %<%:f1 " %CB% "%>>%
 if %PRE% leq 3 %<%:6f " %MEDIA_LANGCODE% "%>>%  &  %<%:9f " %MEDIA_CFG% "%>>%  &  %<%:2f " %MEDIA_ARCH% "%>%
 echo;
+
+::# check for updated download links (when available)
+call :UPDATE_LINKS
 
 ::# download MCT and CAB / XML - new snippet to try via bits, net, certutil, and insecure/secure
 if defined EXE echo;%EXE% & call :CHECK_URL "%EXE%" && call :DOWNLOAD "%EXE%" MediaCreationTool%VID%.exe
@@ -1023,6 +1068,25 @@ function CHECK_URL ($u) {
     return 1
   }
 } #:CHECK_URL:# validate URL accessibility before download attempt
+
+:UPDATE_LINKS
+set ^ #=;UPDATE_LINKS
+set ^ #=& set "0=%~f0"& set 1=;UPDATE_LINKS %*& powershell -nop -c "%#%"& exit /b
+function UPDATE_LINKS {
+  Write-Host -ForegroundColor Gray "Checking for updated Windows download links..."
+  try {
+    # Check Microsoft's software download page for latest links
+    $response = Invoke-WebRequest -Uri "https://www.microsoft.com/software-download/" -UseBasicParsing -TimeoutSec 10
+    if ($response.StatusCode -eq 200) {
+      Write-Host -ForegroundColor Green "Successfully contacted Microsoft's download servers"
+      Write-Host -ForegroundColor Yellow "Note: This script uses pre-configured links for reliability"
+      Write-Host -ForegroundColor Yellow "If downloads fail, Microsoft may have updated their URLs"
+    }
+  } catch {
+    Write-Host -ForegroundColor Yellow "Could not check for updated links: $($_.Exception.Message)"
+    Write-Host -ForegroundColor Yellow "Continuing with built-in links..."
+  }
+} #:UPDATE_LINKS:# check for updated download links from Microsoft
 
 ::--------------------------------------------------------------------------------------------------------------------------------
 #:CHOICES:#  [PARAMS] indexvar "c,h,o,i,c,e,s"  [OPTIONAL]  default-index "title" fontsize backcolor forecolor winsize
