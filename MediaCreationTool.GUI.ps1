@@ -393,7 +393,7 @@ function Create-MainForm {
     # MCT Defaults button
     $defaultBtn = New-Object System.Windows.Forms.Button
     $defaultBtn.Text = "MCT Defaults`r`nRun unmodified Microsoft Media Creation Tool"
-    $defaultBtn.Location = New-Object System.Drawing.Point(295, $buttonY + $buttonSpacing)
+    $defaultBtn.Location = New-Object System.Drawing.Point(295, ($buttonY + $buttonSpacing))
     $defaultBtn.Size = New-Object System.Drawing.Size(180, $buttonHeight)
     $defaultBtn.BackColor = [System.Drawing.Color]::LightGray
     $defaultBtn.Add_Click({
@@ -403,20 +403,20 @@ function Create-MainForm {
     
     # Progress bar
     $script:ProgressBar = New-Object System.Windows.Forms.ProgressBar
-    $script:ProgressBar.Location = New-Object System.Drawing.Point(10, $buttonY + $buttonSpacing + 80)
+    $script:ProgressBar.Location = New-Object System.Drawing.Point(10, ($buttonY + $buttonSpacing + 80))
     $script:ProgressBar.Size = New-Object System.Drawing.Size(760, 20)
     $script:MainForm.Controls.Add($script:ProgressBar)
     
     # Status label
     $script:StatusLabel = New-Object System.Windows.Forms.Label
     $script:StatusLabel.Text = "Ready"
-    $script:StatusLabel.Location = New-Object System.Drawing.Point(10, $buttonY + $buttonSpacing + 105)
+    $script:StatusLabel.Location = New-Object System.Drawing.Point(10, ($buttonY + $buttonSpacing + 105))
     $script:StatusLabel.Size = New-Object System.Drawing.Size(760, 20)
     $script:MainForm.Controls.Add($script:StatusLabel)
     
     # Log window
     $script:LogWindow = New-Object System.Windows.Forms.RichTextBox
-    $script:LogWindow.Location = New-Object System.Drawing.Point(10, $buttonY + $buttonSpacing + 130)
+    $script:LogWindow.Location = New-Object System.Drawing.Point(10, ($buttonY + $buttonSpacing + 130))
     $script:LogWindow.Size = New-Object System.Drawing.Size(760, $script:Config.LogHeight)
     $script:LogWindow.ReadOnly = $true
     $script:LogWindow.BackColor = [System.Drawing.Color]::Black
