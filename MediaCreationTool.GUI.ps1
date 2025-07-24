@@ -125,7 +125,12 @@ function Start-MediaCreationTool {
         
     } catch {
         Write-Log "Failed to start MediaCreationTool.bat: $($_.Exception.Message)" "ERROR" ([System.Drawing.Color]::Red)
+        Write-Log "Please ensure:" "WARNING" ([System.Drawing.Color]::Orange)
+        Write-Log "1. MediaCreationTool.bat exists in the same folder" "WARNING" ([System.Drawing.Color]::Orange)
+        Write-Log "2. You have internet connection" "WARNING" ([System.Drawing.Color]::Orange)
+        Write-Log "3. Antivirus is not blocking the script" "WARNING" ([System.Drawing.Color]::Orange)
         Update-Status "Error: Failed to start process"
+        Enable-Controls
     }
 }
 
