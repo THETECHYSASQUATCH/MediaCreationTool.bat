@@ -393,7 +393,8 @@ function Create-MainForm {
     # MCT Defaults button
     $defaultBtn = New-Object System.Windows.Forms.Button
     $defaultBtn.Text = "MCT Defaults`r`nRun unmodified Microsoft Media Creation Tool"
-    $defaultBtn.Location = New-Object System.Drawing.Point(295, ($buttonY + $buttonSpacing))
+    $defaultBtnY = $buttonY + $buttonSpacing
+    $defaultBtn.Location = New-Object System.Drawing.Point(295, $defaultBtnY)
     $defaultBtn.Size = New-Object System.Drawing.Size(180, $buttonHeight)
     $defaultBtn.BackColor = [System.Drawing.Color]::LightGray
     $defaultBtn.Add_Click({
@@ -403,20 +404,23 @@ function Create-MainForm {
     
     # Progress bar
     $script:ProgressBar = New-Object System.Windows.Forms.ProgressBar
-    $script:ProgressBar.Location = New-Object System.Drawing.Point(10, ($buttonY + $buttonSpacing + 80))
+    $progressBarY = $buttonY + $buttonSpacing + 80
+    $script:ProgressBar.Location = New-Object System.Drawing.Point(10, $progressBarY)
     $script:ProgressBar.Size = New-Object System.Drawing.Size(760, 20)
     $script:MainForm.Controls.Add($script:ProgressBar)
     
     # Status label
     $script:StatusLabel = New-Object System.Windows.Forms.Label
     $script:StatusLabel.Text = "Ready"
-    $script:StatusLabel.Location = New-Object System.Drawing.Point(10, ($buttonY + $buttonSpacing + 105))
+    $statusLabelY = $buttonY + $buttonSpacing + 105
+    $script:StatusLabel.Location = New-Object System.Drawing.Point(10, $statusLabelY)
     $script:StatusLabel.Size = New-Object System.Drawing.Size(760, 20)
     $script:MainForm.Controls.Add($script:StatusLabel)
     
     # Log window
     $script:LogWindow = New-Object System.Windows.Forms.RichTextBox
-    $script:LogWindow.Location = New-Object System.Drawing.Point(10, ($buttonY + $buttonSpacing + 130))
+    $logWindowY = $buttonY + $buttonSpacing + 130
+    $script:LogWindow.Location = New-Object System.Drawing.Point(10, $logWindowY)
     $script:LogWindow.Size = New-Object System.Drawing.Size(760, $script:Config.LogHeight)
     $script:LogWindow.ReadOnly = $true
     $script:LogWindow.BackColor = [System.Drawing.Color]::Black
@@ -428,7 +432,8 @@ function Create-MainForm {
     # Clear log button
     $clearLogBtn = New-Object System.Windows.Forms.Button
     $clearLogBtn.Text = "Clear Log"
-    $clearLogBtn.Location = New-Object System.Drawing.Point(10, $script:Config.FormHeight - 70)
+    $clearLogBtnY = $script:Config.FormHeight - 70
+    $clearLogBtn.Location = New-Object System.Drawing.Point(10, $clearLogBtnY)
     $clearLogBtn.Size = New-Object System.Drawing.Size(80, 25)
     $clearLogBtn.Add_Click({
         $script:LogWindow.Clear()
@@ -439,7 +444,8 @@ function Create-MainForm {
     # Help button
     $helpBtn = New-Object System.Windows.Forms.Button
     $helpBtn.Text = "Help"
-    $helpBtn.Location = New-Object System.Drawing.Point(100, $script:Config.FormHeight - 70)
+    $helpBtnY = $script:Config.FormHeight - 70
+    $helpBtn.Location = New-Object System.Drawing.Point(100, $helpBtnY)
     $helpBtn.Size = New-Object System.Drawing.Size(80, 25)
     $helpBtn.Add_Click({
         Show-HelpDialog
@@ -449,7 +455,8 @@ function Create-MainForm {
     # Close button
     $closeBtn = New-Object System.Windows.Forms.Button
     $closeBtn.Text = "Close"
-    $closeBtn.Location = New-Object System.Drawing.Point(690, $script:Config.FormHeight - 70)
+    $closeBtnY = $script:Config.FormHeight - 70
+    $closeBtn.Location = New-Object System.Drawing.Point(690, $closeBtnY)
     $closeBtn.Size = New-Object System.Drawing.Size(80, 25)
     $closeBtn.Add_Click({
         $script:MainForm.Close()
