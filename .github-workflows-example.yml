@@ -1,0 +1,54 @@
+name: MediaCreationTool.bat Basic Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  basic-functionality-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Run PowerShell basic functionality test
+      shell: pwsh
+      run: |
+        cd ${{ github.workspace }}
+        pwsh -File test-basic-functionality.ps1
+      
+    - name: Display test results
+      if: always()
+      shell: pwsh
+      run: |
+        Write-Host "Basic functionality test completed" -ForegroundColor Green
+        Write-Host "This test verifies MediaCreationTool.bat can be accessed and has proper structure" -ForegroundColor Gray
+
+  windows-functionality-test:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Run batch basic functionality test
+      shell: cmd
+      run: |
+        cd /d %GITHUB_WORKSPACE%
+        test-basic-functionality.bat
+      
+    - name: Run PowerShell test on Windows
+      shell: pwsh
+      run: |
+        cd $env:GITHUB_WORKSPACE
+        .\test-basic-functionality.ps1 -TimeoutSeconds 15
+        
+    - name: Display Windows test results
+      if: always()
+      shell: pwsh
+      run: |
+        Write-Host "Windows-specific tests completed" -ForegroundColor Green
+        Write-Host "This includes actual script execution testing" -ForegroundColor Gray
