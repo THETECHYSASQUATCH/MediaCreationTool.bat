@@ -1,5 +1,27 @@
 # Implementation Summary
 
+## Latest Updates: Windows 11 24H2 and Insider Build Support
+
+### New Features Added
+- **Windows 11 24H2 Support**: Latest Windows 11 feature update (build 26100+)
+- **Windows Insider Build Support**: All three Insider channels (Dev, Beta, Release Preview)
+- **Dynamic Build Detection**: Automatic detection of latest Insider builds
+- **Intelligent Fallbacks**: Graceful fallback to stable releases when needed
+- **Enhanced Choice Handler Mapping**: Fixed and cleaned up version selection logic
+
+### Windows Insider Features
+- **Dev Channel**: Access to cutting-edge builds (build 27000+)
+- **Beta Channel**: More stable preview builds (build 26200+)  
+- **Release Preview**: Near-final builds before public release
+- **Enrollment Detection**: Checks for Windows Insider Program registration
+- **Fallback Mechanism**: Automatically uses Windows 11 24H2 if Insider access unavailable
+
+### Technical Improvements
+- **Fixed Choice Mapping**: Corrected choice-18 handler for 24H2, cleaned up duplicates
+- **Extended Version Support**: Now supports choice-1 through choice-26 properly mapped
+- **Enhanced GUI**: Added Insider Build options to PowerShell GUI interface
+- **Updated Documentation**: Comprehensive help for new features
+
 ## Problem Addressed
 The original MediaCreationTool.bat script suffered from:
 - Poor error reporting and user guidance

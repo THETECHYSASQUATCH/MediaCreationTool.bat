@@ -280,7 +280,11 @@ function Show-VersionDialog {
         "22H2 - Windows 10 2022 Update",
         "11_21H2 - Windows 11 (Original)",
         "11_22H2 - Windows 11 2022 Update",
-        "11_23H2 - Windows 11 2023 Update (Latest)"
+        "11_23H2 - Windows 11 2023 Update",
+        "11_24H2 - Windows 11 2024 Update (Latest)",
+        "Insider_Dev - Windows Insider Dev Channel",
+        "Insider_Beta - Windows Insider Beta Channel", 
+        "Insider_RP - Windows Insider Release Preview"
     )
     
     $latestVersion = ($versions[-1] -split " - ")[0]
@@ -729,12 +733,20 @@ SUPPORTED VERSIONS:
 - Windows 7 Ultimate SP1
 - Windows 8/8.1
 - Windows 10 (all versions from 1507 to 22H2)
-- Windows 11 (21H2, 22H2, 23H2)
+- Windows 11 (21H2, 22H2, 23H2, 24H2)
+- Windows Insider Builds (Dev, Beta, Release Preview)
 
 COMMAND LINE OPTIONS:
 - -AutoSelectLatest: Enable auto-select mode for this session
 - /AutoSelectLatest: Alternative syntax for auto-select mode
 - --auto-latest: Alternative syntax for auto-select mode
+
+WINDOWS INSIDER BUILDS:
+- Dev Channel: Latest cutting-edge builds (may be unstable)
+- Beta Channel: More stable builds than Dev channel
+- Release Preview: Near-final builds before public release
+- Requires Windows Insider Program enrollment
+- Falls back to Windows 11 24H2 if Insider access unavailable
 
 TROUBLESHOOTING:
 - Check the log window for detailed error messages

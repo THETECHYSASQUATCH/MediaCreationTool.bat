@@ -10,9 +10,14 @@ A powerful yet simple Windows deployment automation tool supporting all major Wi
 - **Windows 8** - Volume licensing sources
 - **Windows 8.1** - Volume licensing and software recovery sources
 - **Windows 10** - All versions from 1507 to 22H2 (full MCT support)
-- **Windows 11** - All versions from 21H2 to 23H2 (full MCT support)
+- **Windows 11** - All versions from 21H2 to 24H2 (full MCT support)
+- **Windows Insider Builds** - Dev, Beta, and Release Preview channels (requires enrollment)
 
 ## Enhanced Features
+- **Windows 11 24H2 Support** - Latest Windows 11 feature update with enhanced security and performance
+- **Windows Insider Build Support** - Access to cutting-edge Windows builds across all channels
+- **Dynamic build detection** - Automatically detects latest Insider builds when enrolled
+- **Intelligent fallbacks** - Falls back to stable releases when Insider access unavailable
 - **Dynamic URL validation** - Checks download link availability before attempting downloads
 - **Improved error handling** - Clear error messages with troubleshooting guidance
 - **Legacy Windows support** - Guidance for obtaining older Windows installation media
@@ -78,6 +83,41 @@ Finally, it sets recommended setup options with least amount of issues on upgrad
 >
 > Can even add a VL / MAK / retail product key in the same way to take care of licensing differences.  
 > The script also picks up any `$ISO$` folder in the current location - for $OEM$ branding, configuration, tweaks etc.  
+
+Windows Insider Build Support
+----------------------------
+**New Feature!** Access cutting-edge Windows builds across all Windows Insider channels:
+
+**Dev Channel** (Insider_Dev)
+- Latest and most experimental builds
+- May contain unstable features and potential bugs
+- Updated frequently (weekly or bi-weekly)
+- Recommended for developers and advanced testers
+
+**Beta Channel** (Insider_Beta)  
+- More stable than Dev Channel builds
+- Features nearly ready for release
+- Updated less frequently than Dev Channel
+- Good balance between stability and new features
+
+**Release Preview Channel** (Insider_RP)
+- Near-final builds before public release  
+- Minimal new features, focus on fixes and polish
+- Most stable Insider channel
+- Recommended for early adopters wanting preview of upcoming releases
+
+**Requirements:**
+- Windows Insider Program enrollment (free)
+- Microsoft account linked to Insider Program  
+- Compatible system (Windows 10/11 device)
+
+**Usage:**
+- Select desired Insider channel from version menu
+- Script automatically detects Insider Program enrollment
+- Falls back to Windows 11 24H2 if Insider access unavailable
+- Can use command line: `Insider_Dev MediaCreationTool.bat` or `Dev MediaCreationTool.bat`
+
+**Note:** Insider builds require enrollment in the Windows Insider Program. If you're not enrolled or access isn't available, the script will automatically fall back to the latest stable Windows 11 24H2 build.
 
 Legacy Windows Support (XP, Vista, 7, 8, 8.1)
 --------------------------------------------
