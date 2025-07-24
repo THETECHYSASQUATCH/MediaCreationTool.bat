@@ -56,6 +56,7 @@ set PRESETS=^&Auto Upgrade,Auto ^&ISO,Auto ^&USB,^&Select,MCT ^&Defaults
 set /a dP=4
 
 :begin
+if defined GUI_MODE (echo [STATUS] Detecting current Windows configuration...)
 call :reg_query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "CurrentBuildNumber"     OS_VERSION
 call :reg_query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "DisplayVersion"         OS_VID
 call :reg_query "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion" "EditionID"              OS_EDITION
@@ -130,6 +131,7 @@ if %VER% lss 10240 if %OS_VERSION% geq 10240 (
 for %%s in (%*) do for %%P in (1 2 3 4) do if %%~ns gtr 0 if %%~ns lss 15 if %%~xs. equ .%%P. set /a PRE=%%P & set /a MCT=%%~ns
 
 ::# write auto media preset hint
+if defined GUI_MODE (echo [STATUS] Configured for %VID% %MEDIA_LANGCODE% %MEDIA_EDITION% %MEDIA_ARCH%)
 %<%:f0 " Detected Media "%>>% & if defined MCT %<%:5f " %VID% "%>>%
 %<%:6f " %MEDIA_LANGCODE% "%>>%  &  %<%:9f " %MEDIA_EDITION% "%>>%  &  %<%:2f " %MEDIA_ARCH% "%>%
 echo;
@@ -155,6 +157,7 @@ if %MCT%0 gtr 20 (
 goto choice-%MCT%
 
 :choice-20
+if defined GUI_MODE (echo [STATUS] Configuring Windows 11 23H2 media creation...)
 set "VER=22631" & set "VID=11_23H2" & set "CB=22631.2861.231204-0538.23H2_ni_release_svc_refresh" & set "CT=2023/12/" & set "CC=2.0"
 set "CAB=https://download.microsoft.com/download/6/2/b/62b47bc5-1b28-4bfa-9422-e7a098d326d4/products_win11_20231208.cab"
 set "EXE=https://download.microsoft.com/download/e/c/d/ecd532eb-bed0-465a-9b7a-330066bec3ce/MediaCreationTool_Win11_23H2.exe"
@@ -431,6 +434,10 @@ goto choice-%dV%
 
 :latest unified console appearance under 7 - 11
 @echo off& title MCT& set __COMPAT_LAYER=Installer& chcp 437 >nul& set set=& for %%s in (%*) do if /i %%s equ set (set set=1)
+
+::# Enhanced status reporting for GUI integration
+if not defined GUI_MODE for %%s in (%*) do if /i %%s equ gui (set GUI_MODE=1)
+if defined GUI_MODE (echo [STATUS] Initializing MediaCreationTool.bat in GUI mode)
 if not defined set set /a BackClr=0x1 & set /a TextClr=0xf & set /a Columns=32 & set /a Lines=120 & set /a Buff=9999
 if not defined set set /a SColors=BackClr*16+TextClr & set /a WSize=Columns*256*256+Lines & set /a BSize=Buff*256*256+Lines
 if not defined set for %%s in ("HKCU\Console\MCT") do (
@@ -466,11 +473,13 @@ goto Universal MCT
 
 ::--------------------------------------------------------------------------------------------------------------------------------
 :process
+if defined GUI_MODE (echo [STATUS] Starting %VID% media creation process...)
 if %PRE% equ 1 (set "PRESET=Auto Upgrade")
 if %PRE% equ 2 (set "PRESET=Auto ISO")
-if %PRE% equ 3 (set "PRESET=Auto USB")
+if %PRE% equ 3 (set "PRESET=Auto USB") 
 if %PRE% equ 4 (set "PRESET=Select"       & set EDITION=& set LANGCODE=& set ARCH=& set KEY=)
 if %PRE% equ 5 (set "PRESET=MCT Defaults" & set EDITION=& set LANGCODE=& set ARCH=& set KEY=)
+if defined GUI_MODE (echo [STATUS] Selected preset: %PRESET%)
 if %PRE% equ 5 (goto noelevate) else set set=%MCT%.%PRE%
 
 ::# self elevate if needed for the custom presets to monitor setup progress, passing arguments and last GUI choices
@@ -1630,14 +1639,17 @@ goto :eof
 :ENHANCED_ERROR_HANDLING
 ::# Enhanced error handling with detailed information
 if not exist "MediaCreationTool%VID%.exe" if not exist "%VID%.iso" (
+  if defined GUI_MODE (echo [ERROR] Download failed for Windows %VID%)
   %<%:4f " ERROR: Download failed for Windows %VID% "%>%
   echo;
+  if defined GUI_MODE (echo [ERROR] Possible causes: Internet connection issues, Microsoft servers unavailable, Version no longer supported, Firewall/antivirus blocking download)
   %<%:17 "Possible causes: "%>%
   %<%:17 "- Internet connection issues "%>%
   %<%:17 "- Microsoft servers temporarily unavailable "%>%
   %<%:17 "- Version no longer supported by Microsoft "%>%
   %<%:17 "- Firewall or antivirus blocking download "%>%
   echo;
+  if defined GUI_MODE (echo [ERROR] Suggestions: Check internet connection, Try different version, Run as administrator, Disable antivirus temporarily)
   %<%:17 "Suggestions: "%>%
   %<%:17 "- Check internet connection "%>%
   %<%:17 "- Try a different Windows version "%>%
@@ -1645,7 +1657,8 @@ if not exist "MediaCreationTool%VID%.exe" if not exist "%VID%.iso" (
   %<%:17 "- Temporarily disable antivirus "%>%
   echo;
   call :CHECK_FUTURE_VERSIONS
-  pause & exit /b1
+  if not defined GUI_MODE pause
+  exit /b1
 )
 goto :eof
 
