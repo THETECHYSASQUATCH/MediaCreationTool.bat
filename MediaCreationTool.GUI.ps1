@@ -31,6 +31,8 @@ $script:Config = @{
     LogHeight = 200
     ScriptPath = Join-Path $PSScriptRoot "MediaCreationTool.bat"
     MaxLogLines = 1000
+    AutoSelectLatest = $false
+    VersionDialogTimeout = 30000  # 30 seconds timeout for version dialog
 }
 
 function Write-Log {
@@ -72,6 +74,21 @@ function Write-Log {
             default { "White" }
         }
     )
+}
+
+function Initialize-Configuration {
+    param(
+        [string[]]$Arguments = @()
+    )
+    
+    # Check for auto-select command line flag
+    foreach ($arg in $Arguments) {
+        if ($arg -eq "-AutoSelectLatest" -or $arg -eq "/AutoSelectLatest" -or $arg -eq "--auto-latest") {
+            $script:Config.AutoSelectLatest = $true
+            Write-Log "Auto-select latest version enabled via command line" "INFO" ([System.Drawing.Color]::Blue)
+            break
+        }
+    }
 }
 
 function Update-Status {
@@ -239,6 +256,10 @@ function Enable-Controls {
 }
 
 function Show-VersionDialog {
+    param(
+        [switch]$ForceShow = $false
+    )
+    
     $versions = @(
         "Win7 - Windows 7 Ultimate SP1",
         "Win8 - Windows 8 RTM", 
@@ -262,48 +283,109 @@ function Show-VersionDialog {
         "11_23H2 - Windows 11 2023 Update (Latest)"
     )
     
-    $form = New-Object System.Windows.Forms.Form
-    $form.Text = "Select Windows Version"
-    $form.Size = New-Object System.Drawing.Size(500, 400)
-    $form.StartPosition = "CenterParent"
-    $form.FormBorderStyle = "FixedDialog"
-    $form.MaximizeBox = $false
+    $latestVersion = ($versions[-1] -split " - ")[0]
     
-    $listBox = New-Object System.Windows.Forms.ListBox
-    $listBox.Location = New-Object System.Drawing.Point(10, 10)
-    $listBox.Size = New-Object System.Drawing.Size(460, 300)
-    
-    foreach ($version in $versions) {
-        $listBox.Items.Add($version) | Out-Null
+    # Check if auto-select mode is enabled and not forcing manual selection
+    if ($script:Config.AutoSelectLatest -and -not $ForceShow) {
+        Write-Log "Auto-select mode enabled: Using latest version ($latestVersion)" "INFO" ([System.Drawing.Color]::Blue)
+        return $latestVersion
     }
     
-    $listBox.SelectedIndex = $versions.Count - 1  # Default to latest
-    $form.Controls.Add($listBox)
+    Write-Log "Showing Windows version selection dialog" "INFO"
     
-    $okButton = New-Object System.Windows.Forms.Button
-    $okButton.Location = New-Object System.Drawing.Point(300, 320)
-    $okButton.Size = New-Object System.Drawing.Size(75, 23)
-    $okButton.Text = "OK"
-    $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
-    $form.Controls.Add($okButton)
-    
-    $cancelButton = New-Object System.Windows.Forms.Button
-    $cancelButton.Location = New-Object System.Drawing.Point(395, 320)
-    $cancelButton.Size = New-Object System.Drawing.Size(75, 23)
-    $cancelButton.Text = "Cancel"
-    $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
-    $form.Controls.Add($cancelButton)
-    
-    $form.AcceptButton = $okButton
-    $form.CancelButton = $cancelButton
-    
-    $result = $form.ShowDialog()
-    
-    if ($result -eq [System.Windows.Forms.DialogResult]::OK -and $listBox.SelectedItem) {
-        return ($listBox.SelectedItem -split " - ")[0]
+    try {
+        $form = New-Object System.Windows.Forms.Form
+        $form.Text = "Select Windows Version"
+        $form.Size = New-Object System.Drawing.Size(500, 480)
+        $form.StartPosition = "CenterParent"
+        $form.FormBorderStyle = "FixedDialog"
+        $form.MaximizeBox = $false
+        $form.TopMost = $true
+        
+        # Add auto-select checkbox
+        $autoCheckBox = New-Object System.Windows.Forms.CheckBox
+        $autoCheckBox.Text = "Always use latest version automatically (skips this dialog)"
+        $autoCheckBox.Location = New-Object System.Drawing.Point(10, 10)
+        $autoCheckBox.Size = New-Object System.Drawing.Size(460, 20)
+        $autoCheckBox.Checked = $script:Config.AutoSelectLatest
+        $form.Controls.Add($autoCheckBox)
+        
+        # Add instruction label
+        $instructionLabel = New-Object System.Windows.Forms.Label
+        $instructionLabel.Text = "Select a Windows version to download:"
+        $instructionLabel.Location = New-Object System.Drawing.Point(10, 35)
+        $instructionLabel.Size = New-Object System.Drawing.Size(460, 20)
+        $form.Controls.Add($instructionLabel)
+        
+        $listBox = New-Object System.Windows.Forms.ListBox
+        $listBox.Location = New-Object System.Drawing.Point(10, 60)
+        $listBox.Size = New-Object System.Drawing.Size(460, 320)
+        
+        foreach ($version in $versions) {
+            $listBox.Items.Add($version) | Out-Null
+        }
+        
+        $listBox.SelectedIndex = $versions.Count - 1  # Default to latest
+        $form.Controls.Add($listBox)
+        
+        $okButton = New-Object System.Windows.Forms.Button
+        $okButton.Location = New-Object System.Drawing.Point(300, 390)
+        $okButton.Size = New-Object System.Drawing.Size(75, 23)
+        $okButton.Text = "OK"
+        $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+        $form.Controls.Add($okButton)
+        
+        $cancelButton = New-Object System.Windows.Forms.Button
+        $cancelButton.Location = New-Object System.Drawing.Point(395, 390)
+        $cancelButton.Size = New-Object System.Drawing.Size(75, 23)
+        $cancelButton.Text = "Cancel"
+        $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+        $form.Controls.Add($cancelButton)
+        
+        # Add timeout handling
+        $timer = New-Object System.Windows.Forms.Timer
+        $timer.Interval = $script:Config.VersionDialogTimeout
+        $timer.Add_Tick({
+            Write-Log "Version selection dialog timed out after $($script:Config.VersionDialogTimeout/1000) seconds" "WARNING" ([System.Drawing.Color]::Orange)
+            Write-Log "Defaulting to latest version: $latestVersion" "WARNING" ([System.Drawing.Color]::Orange)
+            $form.DialogResult = [System.Windows.Forms.DialogResult]::OK
+            $listBox.SelectedIndex = $versions.Count - 1
+            $timer.Stop()
+            $form.Close()
+        })
+        $timer.Start()
+        
+        $form.AcceptButton = $okButton
+        $form.CancelButton = $cancelButton
+        
+        $result = $form.ShowDialog()
+        $timer.Stop()
+        
+        if ($result -eq [System.Windows.Forms.DialogResult]::OK -and $listBox.SelectedItem) {
+            $selectedVersion = ($listBox.SelectedItem -split " - ")[0]
+            
+            # Update auto-select setting if changed
+            if ($autoCheckBox.Checked -ne $script:Config.AutoSelectLatest) {
+                $script:Config.AutoSelectLatest = $autoCheckBox.Checked
+                if ($autoCheckBox.Checked) {
+                    Write-Log "Auto-select mode enabled: Future operations will use latest version automatically" "SUCCESS" ([System.Drawing.Color]::Green)
+                } else {
+                    Write-Log "Auto-select mode disabled: Future operations will show version selection dialog" "INFO" ([System.Drawing.Color]::Blue)
+                }
+            }
+            
+            Write-Log "User selected Windows version: $selectedVersion" "SUCCESS" ([System.Drawing.Color]::Green)
+            return $selectedVersion
+        } else {
+            Write-Log "Version selection cancelled by user" "WARNING" ([System.Drawing.Color]::Orange)
+            return $null
+        }
+        
+    } catch {
+        Write-Log "Error displaying version selection dialog: $($_.Exception.Message)" "ERROR" ([System.Drawing.Color]::Red)
+        Write-Log "Falling back to latest version: $latestVersion" "WARNING" ([System.Drawing.Color]::Orange)
+        return $latestVersion
     }
-    
-    return $null
 }
 
 function Create-MainForm {
@@ -332,8 +414,18 @@ function Create-MainForm {
     $descLabel.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
     $script:MainForm.Controls.Add($descLabel)
     
+    # Create hint label for auto-select mode
+    $hintLabel = New-Object System.Windows.Forms.Label
+    $hintLabel.Text = "Tip: Hold Shift while clicking to force version selection dialog (when auto-select is enabled)"
+    $hintLabel.Location = New-Object System.Drawing.Point(10, 65)
+    $hintLabel.Size = New-Object System.Drawing.Size(760, 15)
+    $hintLabel.TextAlign = [System.Drawing.ContentAlignment]::MiddleCenter
+    $hintLabel.ForeColor = [System.Drawing.Color]::DarkBlue
+    $hintLabel.Font = New-Object System.Drawing.Font("Segoe UI", 8, [System.Drawing.FontStyle]::Italic)
+    $script:MainForm.Controls.Add($hintLabel)
+    
     # Create preset buttons
-    $buttonY = 80
+    $buttonY = 90
     $buttonHeight = 60
     $buttonSpacing = 70
     
@@ -344,7 +436,8 @@ function Create-MainForm {
     $autoUpgradeBtn.Size = New-Object System.Drawing.Size(180, $buttonHeight)
     $autoUpgradeBtn.BackColor = [System.Drawing.Color]::LightBlue
     $autoUpgradeBtn.Add_Click({
-        $version = Show-VersionDialog
+        $forceShow = [System.Windows.Forms.Control]::ModifierKeys -eq [System.Windows.Forms.Keys]::Shift
+        $version = Show-VersionDialog -ForceShow:$forceShow
         if ($version) {
             Start-MediaCreationTool "auto $version"
         }
@@ -358,7 +451,8 @@ function Create-MainForm {
     $autoISOBtn.Size = New-Object System.Drawing.Size(180, $buttonHeight)
     $autoISOBtn.BackColor = [System.Drawing.Color]::LightGreen
     $autoISOBtn.Add_Click({
-        $version = Show-VersionDialog
+        $forceShow = [System.Windows.Forms.Control]::ModifierKeys -eq [System.Windows.Forms.Keys]::Shift
+        $version = Show-VersionDialog -ForceShow:$forceShow
         if ($version) {
             Start-MediaCreationTool "iso $version"
         }
@@ -372,7 +466,8 @@ function Create-MainForm {
     $autoUSBBtn.Size = New-Object System.Drawing.Size(180, $buttonHeight)
     $autoUSBBtn.BackColor = [System.Drawing.Color]::LightYellow
     $autoUSBBtn.Add_Click({
-        $version = Show-VersionDialog
+        $forceShow = [System.Windows.Forms.Control]::ModifierKeys -eq [System.Windows.Forms.Keys]::Shift
+        $version = Show-VersionDialog -ForceShow:$forceShow
         if ($version) {
             Start-MediaCreationTool "$version"
         }
@@ -452,6 +547,17 @@ function Create-MainForm {
     })
     $script:MainForm.Controls.Add($helpBtn)
     
+    # Settings button
+    $settingsBtn = New-Object System.Windows.Forms.Button
+    $settingsBtn.Text = "Settings"
+    $settingsBtnY = $script:Config.FormHeight - 70
+    $settingsBtn.Location = New-Object System.Drawing.Point(190, $settingsBtnY)
+    $settingsBtn.Size = New-Object System.Drawing.Size(80, 25)
+    $settingsBtn.Add_Click({
+        Show-SettingsDialog
+    })
+    $script:MainForm.Controls.Add($settingsBtn)
+    
     # Close button
     $closeBtn = New-Object System.Windows.Forms.Button
     $closeBtn.Text = "Close"
@@ -495,12 +601,99 @@ function Create-MainForm {
     }
 }
 
+function Show-SettingsDialog {
+    $settingsForm = New-Object System.Windows.Forms.Form
+    $settingsForm.Text = "Settings - MediaCreationTool.bat GUI"
+    $settingsForm.Size = New-Object System.Drawing.Size(450, 200)
+    $settingsForm.StartPosition = "CenterParent"
+    $settingsForm.FormBorderStyle = "FixedDialog"
+    $settingsForm.MaximizeBox = $false
+    
+    # Auto-select checkbox
+    $autoCheckBox = New-Object System.Windows.Forms.CheckBox
+    $autoCheckBox.Text = "Always use latest Windows version automatically"
+    $autoCheckBox.Location = New-Object System.Drawing.Point(20, 20)
+    $autoCheckBox.Size = New-Object System.Drawing.Size(400, 20)
+    $autoCheckBox.Checked = $script:Config.AutoSelectLatest
+    $settingsForm.Controls.Add($autoCheckBox)
+    
+    # Description label
+    $descLabel = New-Object System.Windows.Forms.Label
+    $descLabel.Text = "When enabled, version selection dialogs will be skipped and the latest Windows version will be used automatically."
+    $descLabel.Location = New-Object System.Drawing.Point(40, 45)
+    $descLabel.Size = New-Object System.Drawing.Size(360, 40)
+    $descLabel.ForeColor = [System.Drawing.Color]::DarkBlue
+    $settingsForm.Controls.Add($descLabel)
+    
+    # Timeout setting
+    $timeoutLabel = New-Object System.Windows.Forms.Label
+    $timeoutLabel.Text = "Version dialog timeout (seconds):"
+    $timeoutLabel.Location = New-Object System.Drawing.Point(20, 95)
+    $timeoutLabel.Size = New-Object System.Drawing.Size(180, 20)
+    $settingsForm.Controls.Add($timeoutLabel)
+    
+    $timeoutNumeric = New-Object System.Windows.Forms.NumericUpDown
+    $timeoutNumeric.Location = New-Object System.Drawing.Point(200, 93)
+    $timeoutNumeric.Size = New-Object System.Drawing.Size(60, 20)
+    $timeoutNumeric.Minimum = 10
+    $timeoutNumeric.Maximum = 300
+    $timeoutNumeric.Value = $script:Config.VersionDialogTimeout / 1000
+    $settingsForm.Controls.Add($timeoutNumeric)
+    
+    # OK button
+    $okButton = New-Object System.Windows.Forms.Button
+    $okButton.Text = "OK"
+    $okButton.Location = New-Object System.Drawing.Point(280, 130)
+    $okButton.Size = New-Object System.Drawing.Size(75, 25)
+    $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $settingsForm.Controls.Add($okButton)
+    
+    # Cancel button
+    $cancelButton = New-Object System.Windows.Forms.Button
+    $cancelButton.Text = "Cancel"
+    $cancelButton.Location = New-Object System.Drawing.Point(365, 130)
+    $cancelButton.Size = New-Object System.Drawing.Size(75, 25)
+    $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $settingsForm.Controls.Add($cancelButton)
+    
+    $settingsForm.AcceptButton = $okButton
+    $settingsForm.CancelButton = $cancelButton
+    
+    $result = $settingsForm.ShowDialog()
+    
+    if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+        $oldAutoSelect = $script:Config.AutoSelectLatest
+        $oldTimeout = $script:Config.VersionDialogTimeout
+        
+        $script:Config.AutoSelectLatest = $autoCheckBox.Checked
+        $script:Config.VersionDialogTimeout = $timeoutNumeric.Value * 1000
+        
+        if ($oldAutoSelect -ne $script:Config.AutoSelectLatest) {
+            if ($script:Config.AutoSelectLatest) {
+                Write-Log "Auto-select mode enabled: Future operations will use latest version automatically" "SUCCESS" ([System.Drawing.Color]::Green)
+            } else {
+                Write-Log "Auto-select mode disabled: Future operations will show version selection dialog" "INFO" ([System.Drawing.Color]::Blue)
+            }
+        }
+        
+        if ($oldTimeout -ne $script:Config.VersionDialogTimeout) {
+            Write-Log "Version dialog timeout changed to $($script:Config.VersionDialogTimeout/1000) seconds" "INFO"
+        }
+    }
+}
+
 function Show-HelpDialog {
     $helpText = @"
 MediaCreationTool.bat GUI Help
 
 OVERVIEW:
 This GUI provides an easy-to-use interface for the MediaCreationTool.bat script, which creates Windows installation media for versions 7, 8, 8.1, 10, and 11.
+
+NEW FEATURES:
+- Auto-Select Latest Version: Enable automatic selection of the latest Windows version
+- Version Dialog Timeout: Automatic fallback to latest version if dialog times out
+- Enhanced Error Handling: Robust fallback mechanisms for failed dialogs
+- Comprehensive Logging: Detailed logs for all version selection activities
 
 PRESETS:
 
@@ -529,11 +722,19 @@ PRESETS:
    - No script enhancements or modifications
    - Original Microsoft experience
 
+AUTO-SELECT MODE:
+When enabled via Settings or command line (-AutoSelectLatest), the version selection dialog will be skipped and the latest Windows version will be used automatically. This is useful for automated scenarios or users who always want the latest version.
+
 SUPPORTED VERSIONS:
 - Windows 7 Ultimate SP1
 - Windows 8/8.1
 - Windows 10 (all versions from 1507 to 22H2)
 - Windows 11 (21H2, 22H2, 23H2)
+
+COMMAND LINE OPTIONS:
+- -AutoSelectLatest: Enable auto-select mode for this session
+- /AutoSelectLatest: Alternative syntax for auto-select mode
+- --auto-latest: Alternative syntax for auto-select mode
 
 TROUBLESHOOTING:
 - Check the log window for detailed error messages
@@ -541,6 +742,7 @@ TROUBLESHOOTING:
 - Run as Administrator if needed
 - Temporarily disable antivirus if downloads fail
 - Check firewall settings
+- If version dialog fails, it will automatically default to latest version
 
 For more information, visit the GitHub repository.
 "@
@@ -575,12 +777,19 @@ For more information, visit the GitHub repository.
 
 # Main entry point
 function Start-GUI {
+    param(
+        [string[]]$Arguments = $args
+    )
+    
     try {
         # Check if we can run the GUI
         if (-not ([System.Environment]::UserInteractive)) {
             Write-Error "This script requires an interactive session to display the GUI."
             return
         }
+        
+        # Initialize configuration with command line arguments
+        Initialize-Configuration -Arguments $Arguments
         
         # Enable visual styles
         [System.Windows.Forms.Application]::EnableVisualStyles()
@@ -590,6 +799,10 @@ function Start-GUI {
         
         Write-Log "Starting MediaCreationTool.bat GUI..." "INFO" ([System.Drawing.Color]::Blue)
         Write-Log "Ready to create Windows installation media" "INFO"
+        
+        if ($script:Config.AutoSelectLatest) {
+            Write-Log "Auto-select mode is enabled - latest version will be used automatically" "INFO" ([System.Drawing.Color]::Green)
+        }
         
         # Show the form
         [System.Windows.Forms.Application]::Run($script:MainForm)
@@ -609,5 +822,5 @@ function Start-GUI {
 
 # Start the GUI if script is run directly
 if ($MyInvocation.InvocationName -ne ".") {
-    Start-GUI
+    Start-GUI -Arguments $args
 }
