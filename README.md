@@ -1,9 +1,45 @@
 Not just an Universal MediaCreationTool wrapper script with ingenious support for business editions,  
 <img src="preview.png">  
-A powerful yet simple windows 10 / 11 deployment automation tool as well!  
+A powerful yet simple Windows 7/8/10/11 deployment automation tool as well!  
 *If you had no success launching the script so far, this latest version will work*  
 
-Presets  
+## Supported Windows Versions
+
+This tool now supports downloading and creating installation media for:
+
+**Windows 7**
+- Windows 7 Ultimate SP1 (x64)
+- Direct ISO download from archived sources
+- Legacy hardware compatibility
+
+**Windows 8/8.1** 
+- Windows 8 x64 RTM
+- Windows 8.1 Pro x64
+- Direct ISO download method
+
+**Windows 10**
+- All versions from 1507 to 22H2
+- Full MCT integration with products.xml modification
+- Business editions support
+
+**Windows 11**
+- 21H2, 22H2, and 23H2 releases
+- TPM bypass capabilities built-in
+- Modern hardware optimization
+
+## Enhanced Features
+
+**Dynamic Download Sources**
+- Multiple fallback download sources for reliability
+- Enhanced error handling with detailed diagnostics
+- Future-proofing with version detection capabilities
+
+**Error Recovery**
+- Automatic fallback to alternative download sources
+- Clear error messages with troubleshooting suggestions
+- Network and firewall guidance
+
+Presets
 -------  
 1 ***Auto Upgrade*** with detected media, script assists setupprep for upgrading directly  
 > _- can keep files and apps on more scenarios where os and target edition does not match_  
