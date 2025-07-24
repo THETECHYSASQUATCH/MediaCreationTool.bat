@@ -197,6 +197,28 @@ MediaCreationTool.bat 11_23H2
 - Consider virtualization for legacy Windows testing
 - Plan migration to supported Windows versions when possible
 
+Testing
+-------
+Basic functionality tests are included to verify that MediaCreationTool.bat can be invoked and produces expected output:
+
+**Available Tests:**
+- `test-basic-functionality.bat` - Windows batch test script
+- `test-basic-functionality.ps1` - Cross-platform PowerShell test script
+
+**Quick Test:**
+```powershell
+# Run basic functionality test
+.\test-basic-functionality.ps1
+```
+
+**What the tests verify:**
+- Script file exists and is accessible
+- Script contains expected content patterns
+- Script can be invoked (on Windows systems)
+- Basic error detection and reporting
+
+For detailed testing information, see [README-TESTS.md](README-TESTS.md).
+
 Changelog  
 ---------  
 _No need to right-click Run as Admin, script will ask itself. Directly saving the Raw files no longer breaks line endings_  
